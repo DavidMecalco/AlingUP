@@ -141,12 +141,10 @@ export const validateCreateTicketForm = (data) => {
     errors.titulo = 'El título no puede exceder 200 caracteres'
   }
   
-  if (!data.descripcion || data.descripcion.trim().length === 0) {
-    errors.descripcion = 'La descripción es requerida'
-  } else if (data.descripcion.trim().length < 10) {
-    errors.descripcion = 'La descripción debe tener al menos 10 caracteres'
-  } else if (data.descripcion.trim().length > 2000) {
-    errors.descripcion = 'La descripción no puede exceder 2000 caracteres'
+  // Validate HTML content for description
+  const htmlValidation = validateHtmlContent(data.descripcion)
+  if (!htmlValidation.isValid) {
+    errors.descripcion = htmlValidation.errors[0] // Take first error
   }
   
   if (!data.prioridad) {
@@ -184,12 +182,10 @@ export const validateUpdateTicketForm = (data) => {
   }
   
   if (data.descripcion !== undefined) {
-    if (!data.descripcion || data.descripcion.trim().length === 0) {
-      errors.descripcion = 'La descripción es requerida'
-    } else if (data.descripcion.trim().length < 10) {
-      errors.descripcion = 'La descripción debe tener al menos 10 caracteres'
-    } else if (data.descripcion.trim().length > 2000) {
-      errors.descripcion = 'La descripción no puede exceder 2000 caracteres'
+    // Validate HTML content for description
+    const htmlValidation = validateHtmlContent(data.descripcion)
+    if (!htmlValidation.isValid) {
+      errors.descripcion = htmlValidation.errors[0] // Take first error
     }
   }
   
@@ -270,4 +266,50 @@ export const sanitizeInput = (input) => {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#x27;')
     .replace(/\//g, '&#x2F;')
+}
+
+/**
+ * Validate HTML content from rich text editor
+ * @param {string} htmlContent - HTML content to validate
+ * @returns {Object} Validation result
+ */
+export const validateHtmlContent = (htmlContent) => {
+  const errors = []
+  
+  if (!htmlContent) {
+    errors.push('El contenido es requerido')
+    return { isValid: false, errors }
+  }
+  
+  // Strip HTML tags to check actual text content
+  const textContent = htmlContent.replace(/<[^>]*>/g, '').trim()
+  
+  if (textContent.length === 0) {
+    errors.push('El contenido no puede estar vacío')
+  } else if (textContent.length < 10) {
+    errors.push('El contenido debe tener al menos 10 caracteres')
+  } else if (htmlContent.length > 10000) { // Allow more characters for HTML
+    errors.push('El contenido es demasiado largo')
+  }
+  
+  // Check for potentially dangerous content
+  const dangerousPatterns = [
+    /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+    /javascript:/gi,
+    /on\w+\s*=/gi
+  ]
+  
+  for (const pattern of dangerousPatterns) {
+    if (pattern.test(htmlContent)) {
+      errors.push('El contenido contiene elementos no permitidos')
+      break
+    }
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors,
+    textLength: textContent.length,
+    htmlLength: htmlContent.length
+  }
 }

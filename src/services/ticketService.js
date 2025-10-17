@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import securityService from './securityService.js'
 
 /**
  * Service for managing tickets with CRUD operations
@@ -8,10 +9,30 @@ class TicketService {
    * Get all tickets with optional filtering and pagination
    * @param {import('../types/index.js').TicketFilters} filters - Filter options
    * @param {import('../types/index.js').PaginationOptions} pagination - Pagination options
-   * @returns {Promise<{data: import('../types/index.js').Ticket[], error: Object|null, count: number}>}
+   * @param {string} userId - User ID for rate limiting and security
+   * @returns {Promise<{data: import('../types/index.js').Ticket[], error: Object|null, count: number, hasMore: boolean, nextCursor?: string}>}
    */
-  async getTickets(filters = {}, pagination = {}) {
+  async getTickets(filters = {}, pagination = {}, userId = 'anonymous') {
     try {
+      // Apply rate limiting
+      const rateLimitResult = securityService.checkRateLimit('api', userId)
+      if (!rateLimitResult.allowed) {
+        return { 
+          data: [], 
+          error: { message: 'Rate limit exceeded. Please try again later.' }, 
+          count: 0, 
+          hasMore: false 
+        }
+      }
+
+      // Sanitize search input
+      const sanitizedFilters = { ...filters }
+      if (sanitizedFilters.search) {
+        sanitizedFilters.search = securityService.sanitizeInput(sanitizedFilters.search, 'text', {
+          maxLength: 500,
+          allowNewlines: false
+        })
+      }
       const { 
         estados, 
         prioridades, 
@@ -21,13 +42,15 @@ class TicketService {
         search, 
         fecha_desde, 
         fecha_hasta 
-      } = filters
+      } = sanitizedFilters
 
       const { 
         page = 1, 
         limit = 20, 
         sortBy = 'created_at', 
-        sortOrder = 'desc' 
+        sortOrder = 'desc',
+        cursor = null,
+        useCursor = false
       } = pagination
 
       let query = supabase
@@ -61,7 +84,7 @@ class TicketService {
       }
 
       if (search && search.trim()) {
-        query = query.or(`titulo.ilike.%${search}%,descripcion.ilike.%${search}%`)
+        query = query.or(`titulo.ilike.%${search}%,descripcion.ilike.%${search}%,ticket_number.ilike.%${search}%`)
       }
 
       if (fecha_desde) {
@@ -75,25 +98,55 @@ class TicketService {
       // Apply sorting
       query = query.order(sortBy, { ascending: sortOrder === 'asc' })
 
-      // Apply pagination
-      const from = (page - 1) * limit
-      const to = from + limit - 1
-      query = query.range(from, to)
+      // Apply pagination - cursor-based or offset-based
+      if (useCursor && cursor) {
+        // Cursor-based pagination for better performance with large datasets
+        const operator = sortOrder === 'asc' ? 'gt' : 'lt'
+        query = query[operator](sortBy, cursor)
+        query = query.limit(limit + 1) // Get one extra to check if there are more
+      } else {
+        // Traditional offset-based pagination
+        const from = (page - 1) * limit
+        const to = from + limit - 1
+        query = query.range(from, to)
+      }
 
       const { data, error, count } = await query
 
       if (error) {
         console.error('Get tickets error:', error)
-        return { data: [], error, count: 0 }
+        return { data: [], error, count: 0, hasMore: false }
       }
 
-      return { data: data || [], error: null, count: count || 0 }
+      let hasMore = false
+      let nextCursor = null
+      let resultData = data || []
+
+      if (useCursor && resultData.length > limit) {
+        // Remove the extra item and set hasMore flag
+        hasMore = true
+        resultData = resultData.slice(0, limit)
+        nextCursor = resultData[resultData.length - 1]?.[sortBy]
+      } else if (!useCursor) {
+        // For offset-based pagination, check if there are more pages
+        const totalPages = Math.ceil((count || 0) / limit)
+        hasMore = page < totalPages
+      }
+
+      return { 
+        data: resultData, 
+        error: null, 
+        count: count || 0,
+        hasMore,
+        nextCursor
+      }
     } catch (error) {
       console.error('Get tickets error:', error)
       return { 
         data: [], 
         error: { message: 'Error al obtener tickets' }, 
-        count: 0 
+        count: 0,
+        hasMore: false
       }
     }
   }
@@ -132,6 +185,69 @@ class TicketService {
   }
 
   /**
+   * Validate that cliente_id references a user with 'cliente' role
+   * @param {string} clienteId - Client user ID to validate
+   * @returns {Promise<{isValid: boolean, error: Object|null}>}
+   */
+  async validateClienteId(clienteId) {
+    try {
+      const { data: user, error } = await supabase
+        .from('users')
+        .select('id, rol, estado')
+        .eq('id', clienteId)
+        .single()
+
+      if (error || !user) {
+        return { 
+          isValid: false, 
+          error: { message: 'Usuario no encontrado o inválido' }
+        }
+      }
+
+      // Check if user is active
+      if (!user.estado) {
+        return { 
+          isValid: false, 
+          error: { message: 'Usuario inactivo' }
+        }
+      }
+
+      // Allow cliente and admin roles to create tickets
+      if (!['cliente', 'admin'].includes(user.rol)) {
+        return { 
+          isValid: false, 
+          error: { message: 'Solo clientes y administradores pueden crear tickets' }
+        }
+      }
+      
+      return { isValid: true, error: null }
+    } catch (error) {
+      console.error('Cliente validation error:', error)
+      return { 
+        isValid: false, 
+        error: { message: 'Error al validar usuario' }
+      }
+    }
+  }
+
+  /**
+   * Sanitize HTML content for rich text descriptions using security service
+   * @param {string} htmlContent - HTML content to sanitize
+   * @returns {string} - Sanitized HTML content
+   */
+  sanitizeHtmlContent(htmlContent) {
+    return securityService.sanitizeInput(htmlContent, 'html', {
+      allowedTags: ['p', 'br', 'strong', 'b', 'em', 'i', 'ul', 'ol', 'li', 'code', 'pre', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote'],
+      allowedAttributes: {
+        '*': ['class'],
+        'a': ['href', 'title', 'target'],
+        'img': ['src', 'alt', 'width', 'height'],
+        'code': ['class']
+      }
+    })
+  }
+
+  /**
    * Create a new ticket
    * @param {import('../types/index.js').CreateTicketData} ticketData - Ticket data
    * @param {string} clienteId - Client user ID
@@ -139,12 +255,36 @@ class TicketService {
    */
   async createTicket(ticketData, clienteId) {
     try {
+      // Apply rate limiting for ticket creation
+      const rateLimitResult = securityService.checkRateLimit('api', clienteId)
+      if (!rateLimitResult.allowed) {
+        return { 
+          data: null, 
+          error: { message: 'Rate limit exceeded. Please try again later.' }
+        }
+      }
+
+      // Check for suspicious activity
+      securityService.checkSuspiciousActivity(clienteId, 'ticket_creation', {
+        titulo: ticketData.titulo,
+        prioridad: ticketData.prioridad
+      })
+
+      // Validate and sanitize ticket data using security service
+      const sanitizedData = securityService.validateTicketData({
+        ...ticketData,
+        cliente_id: clienteId
+      })
+
+      // Validate cliente_id before creating ticket
+      const validation = await this.validateClienteId(clienteId)
+      if (!validation.isValid) {
+        return { data: null, error: validation.error }
+      }
+
       const { data, error } = await supabase
         .from('tickets')
-        .insert({
-          ...ticketData,
-          cliente_id: clienteId
-        })
+        .insert(sanitizedData)
         .select(`
           *,
           cliente:cliente_id(id, email, nombre_completo, empresa_cliente),
@@ -155,12 +295,26 @@ class TicketService {
 
       if (error) {
         console.error('Create ticket error:', error)
+        // Check if it's the specific cliente role validation error
+        if (error.message && error.message.includes('Cliente ID must reference a user with cliente role')) {
+          return { 
+            data: null, 
+            error: { message: 'Cliente ID must reference a user with cliente role' }
+          }
+        }
         return { data: null, error }
       }
 
       return { data, error: null }
     } catch (error) {
       console.error('Create ticket error:', error)
+      // Check if it's the specific cliente role validation error
+      if (error.message && error.message.includes('Cliente ID must reference a user with cliente role')) {
+        return { 
+          data: null, 
+          error: { message: 'Cliente ID must reference a user with cliente role' }
+        }
+      }
       return { 
         data: null, 
         error: { message: 'Error al crear ticket' } 
@@ -233,7 +387,7 @@ class TicketService {
   /**
    * Assign ticket to technician
    * @param {string} ticketId - Ticket ID
-   * @param {string} tecnicoId - Technician user ID
+   * @param {string} tecnicoId - Technician user ID (null to unassign)
    * @returns {Promise<{data: import('../types/index.js').Ticket|null, error: Object|null}>}
    */
   async assignTicket(ticketId, tecnicoId) {
@@ -241,22 +395,81 @@ class TicketService {
   }
 
   /**
+   * Bulk assign multiple tickets to a technician
+   * @param {Array<string>} ticketIds - Array of ticket IDs
+   * @param {string} tecnicoId - Technician user ID (null to unassign)
+   * @returns {Promise<{data: Array, errors: Array}>}
+   */
+  async bulkAssignTickets(ticketIds, tecnicoId) {
+    const results = []
+    const errors = []
+
+    for (const ticketId of ticketIds) {
+      try {
+        const result = await this.assignTicket(ticketId, tecnicoId)
+        
+        if (result.error) {
+          errors.push({
+            ticketId,
+            error: result.error
+          })
+        } else {
+          results.push(result.data)
+        }
+      } catch (error) {
+        errors.push({
+          ticketId,
+          error: { message: error.message || 'Error desconocido' }
+        })
+      }
+    }
+
+    return {
+      data: results,
+      errors: errors
+    }
+  }
+
+  /**
    * Change ticket state
    * @param {string} ticketId - Ticket ID
    * @param {import('../types/index.js').TicketEstado} newState - New state
-   * @returns {Promise<{data: import('../types/index.js').Ticket|null, error: Object|null}>}
+   * @param {string} [userId] - User making the change (for timeline)
+   * @returns {Promise<{data: import('../types/index.js').Ticket|null, error: Object|null, oldState: string|null}>}
    */
-  async changeTicketState(ticketId, newState) {
-    const updateData = { estado: newState }
-    
-    // Set closed_at when closing ticket
-    if (newState === 'cerrado') {
-      updateData.closed_at = new Date().toISOString()
-    } else if (newState !== 'cerrado') {
-      updateData.closed_at = null
-    }
+  async changeTicketState(ticketId, newState, userId = null) {
+    try {
+      // Get current ticket to track old state
+      const currentTicket = await this.getTicketById(ticketId)
+      if (currentTicket.error) {
+        return { data: null, error: currentTicket.error, oldState: null }
+      }
 
-    return this.updateTicket(ticketId, updateData)
+      const oldState = currentTicket.data?.estado
+
+      const updateData = { estado: newState }
+      
+      // Set closed_at when closing ticket
+      if (newState === 'cerrado') {
+        updateData.closed_at = new Date().toISOString()
+      } else if (newState !== 'cerrado') {
+        updateData.closed_at = null
+      }
+
+      const result = await this.updateTicket(ticketId, updateData)
+      
+      return {
+        ...result,
+        oldState
+      }
+    } catch (error) {
+      console.error('Change ticket state error:', error)
+      return { 
+        data: null, 
+        error: { message: 'Error al cambiar estado del ticket' },
+        oldState: null
+      }
+    }
   }
 
   /**

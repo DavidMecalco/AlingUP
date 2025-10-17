@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { AuthenticatedRoute } from '../components/auth/ProtectedRoute'
 import { useAuth } from '../hooks/useAuth'
 import TicketForm from '../components/tickets/TicketForm'
+import TicketIdDisplay from '../components/tickets/TicketIdDisplay'
 import ticketService from '../services/ticketService'
 
 const CreateTicket = () => {
@@ -10,6 +11,7 @@ const CreateTicket = () => {
   const { user } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
+  const [createdTicket, setCreatedTicket] = useState(null)
 
   const handleSubmit = async (formData) => {
     setIsSubmitting(true)
@@ -23,10 +25,8 @@ const CreateTicket = () => {
         return
       }
 
-      // Success - redirect to ticket detail or tickets list
-      navigate(`/tickets/${data.id}`, { 
-        state: { message: 'Ticket creado exitosamente' }
-      })
+      // Success - show created ticket info
+      setCreatedTicket(data)
     } catch (error) {
       console.error('Create ticket error:', error)
       setError('Error inesperado al crear el ticket')
@@ -37,6 +37,15 @@ const CreateTicket = () => {
 
   const handleCancel = () => {
     navigate('/tickets')
+  }
+
+  const handleViewTicket = () => {
+    navigate(`/tickets/${createdTicket.id}`)
+  }
+
+  const handleCreateAnother = () => {
+    setCreatedTicket(null)
+    setError(null)
   }
 
   return (
@@ -70,6 +79,62 @@ const CreateTicket = () => {
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
+            
+            {/* Success Message */}
+            {createdTicket && (
+              <div className="mb-6 rounded-md bg-green-50 border border-green-200 p-6">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-6 w-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <h3 className="text-lg font-medium text-green-800 mb-2">
+                      ¡Ticket creado exitosamente!
+                    </h3>
+                    <p className="text-sm text-green-700 mb-4">
+                      Tu ticket ha sido creado y asignado el siguiente ID para seguimiento:
+                    </p>
+                    
+                    <div className="mb-4">
+                      <TicketIdDisplay 
+                        ticketNumber={createdTicket.ticket_number} 
+                        size="large"
+                        showCopyButton={true}
+                      />
+                    </div>
+                    
+                    <div className="text-sm text-green-700 mb-4">
+                      <p><strong>Título:</strong> {createdTicket.titulo}</p>
+                      <p><strong>Prioridad:</strong> {createdTicket.prioridad}</p>
+                      <p><strong>Estado:</strong> {createdTicket.estado}</p>
+                    </div>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <button
+                        onClick={handleViewTicket}
+                        className="btn-primary"
+                      >
+                        Ver Ticket
+                      </button>
+                      <button
+                        onClick={handleCreateAnother}
+                        className="btn-secondary"
+                      >
+                        Crear Otro Ticket
+                      </button>
+                      <button
+                        onClick={handleCancel}
+                        className="btn-secondary"
+                      >
+                        Ir a Mis Tickets
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Error Message */}
             {error && (
               <div className="mb-6 rounded-md bg-red-50 p-4">
@@ -91,65 +156,69 @@ const CreateTicket = () => {
               </div>
             )}
 
-            {/* Form Card */}
-            <div className="card">
-              <div className="mb-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-2">
-                  Información del Ticket
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Completa todos los campos requeridos. Mientras más detalles proporciones, 
-                  más rápido podremos ayudarte a resolver tu problema.
-                </p>
-              </div>
+            {/* Form Card - Only show if no ticket created yet */}
+            {!createdTicket && (
+              <div className="card">
+                <div className="mb-6">
+                  <h2 className="text-lg font-medium text-gray-900 mb-2">
+                    Información del Ticket
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    Completa todos los campos requeridos. Mientras más detalles proporciones, 
+                    más rápido podremos ayudarte a resolver tu problema.
+                  </p>
+                </div>
 
-              <TicketForm
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
-                isLoading={isSubmitting}
-              />
-            </div>
+                <TicketForm
+                  onSubmit={handleSubmit}
+                  onCancel={handleCancel}
+                  isLoading={isSubmitting}
+                />
+              </div>
+            )}
 
-            {/* Help Section */}
-            <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-              <h3 className="text-lg font-medium text-blue-900 mb-4">
-                💡 Consejos para crear un buen ticket
-              </h3>
-              <div className="space-y-3 text-sm text-blue-800">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span className="text-xs font-medium">1</span>
+            {/* Help Section - Only show if no ticket created yet */}
+            {!createdTicket && (
+              <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 className="text-lg font-medium text-blue-900 mb-4">
+                  💡 Consejos para crear un buen ticket
+                </h3>
+                <div className="space-y-3 text-sm text-blue-800">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <span className="text-xs font-medium">1</span>
+                    </div>
+                    <div>
+                      <strong>Sé específico en el título:</strong> En lugar de "No funciona", usa "Error al iniciar sesión en el sistema de inventario"
+                    </div>
                   </div>
-                  <div>
-                    <strong>Sé específico en el título:</strong> En lugar de "No funciona", usa "Error al iniciar sesión en el sistema de inventario"
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <span className="text-xs font-medium">2</span>
+                    </div>
+                    <div>
+                      <strong>Incluye pasos para reproducir:</strong> Describe exactamente qué estabas haciendo cuando ocurrió el problema
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span className="text-xs font-medium">2</span>
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <span className="text-xs font-medium">3</span>
+                    </div>
+                    <div>
+                      <strong>Menciona mensajes de error:</strong> Si aparece algún mensaje de error, cópialo exactamente como aparece
+                    </div>
                   </div>
-                  <div>
-                    <strong>Incluye pasos para reproducir:</strong> Describe exactamente qué estabas haciendo cuando ocurrió el problema
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span className="text-xs font-medium">3</span>
-                  </div>
-                  <div>
-                    <strong>Menciona mensajes de error:</strong> Si aparece algún mensaje de error, cópialo exactamente como aparece
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
-                    <span className="text-xs font-medium">4</span>
-                  </div>
-                  <div>
-                    <strong>Selecciona la prioridad correcta:</strong> Esto nos ayuda a atender primero los problemas más críticos
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center mr-3 mt-0.5">
+                      <span className="text-xs font-medium">4</span>
+                    </div>
+                    <div>
+                      <strong>Selecciona la prioridad correcta:</strong> Esto nos ayuda a atender primero los problemas más críticos
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

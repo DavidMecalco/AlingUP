@@ -51,7 +51,7 @@ export const capitalize = (str) => {
  * @returns {string} Random ID
  */
 export const generateId = () => {
-  return Math.random().toString(36).substr(2, 9)
+  return Math.random().toString(36).substring(2, 11)
 }
 
 /**
@@ -214,6 +214,56 @@ export const filterTicketsBySearch = (tickets, searchTerm) => {
     ticket.tecnico?.nombre_completo?.toLowerCase().includes(term) ||
     formatTicketId(ticket.id).toLowerCase().includes(term)
   )
+}
+
+/**
+ * Strip HTML tags from content
+ * @param {string} html - HTML content
+ * @returns {string} Plain text content
+ */
+export const stripHtml = (html) => {
+  if (!html) return ''
+  return html.replace(/<[^>]*>/g, '').trim()
+}
+
+/**
+ * Get plain text preview from HTML content
+ * @param {string} html - HTML content
+ * @param {number} maxLength - Maximum length of preview
+ * @returns {string} Plain text preview
+ */
+export const getTextPreview = (html, maxLength = 150) => {
+  const plainText = stripHtml(html)
+  if (plainText.length <= maxLength) return plainText
+  return plainText.substring(0, maxLength) + '...'
+}
+
+/**
+ * Sanitize HTML content for safe display
+ * @param {string} html - HTML content to sanitize
+ * @returns {string} Sanitized HTML
+ */
+export const sanitizeHtml = (html) => {
+  if (!html) return ''
+  
+  // Basic sanitization - remove dangerous elements and attributes
+  return html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+\s*=/gi, '')
+    .replace(/<iframe\b[^>]*>/gi, '')
+    .replace(/<object\b[^>]*>/gi, '')
+    .replace(/<embed\b[^>]*>/gi, '')
+}
+
+/**
+ * Check if content is HTML
+ * @param {string} content - Content to check
+ * @returns {boolean} True if content contains HTML tags
+ */
+export const isHtmlContent = (content) => {
+  if (!content) return false
+  return /<[^>]*>/g.test(content)
 }
 
 /**

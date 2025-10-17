@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { validateCreateTicketForm } from '../../utils/validation'
 import { TICKET_PRIORITIES } from '../../utils/constants'
 import ticketService from '../../services/ticketService'
+import CustomRichTextEditor from '../editor/CustomRichTextEditor'
+import TicketIdDisplay from './TicketIdDisplay'
 
-const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null }) => {
+const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null, showTicketId = false }) => {
   const [formData, setFormData] = useState({
     titulo: '',
     descripcion: '',
@@ -96,6 +98,23 @@ const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Ticket ID Display (for existing tickets or after creation) */}
+      {showTicketId && initialData?.ticket_number && (
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-1">ID del Ticket</h3>
+              <p className="text-xs text-gray-500">Usa este ID para dar seguimiento a tu ticket</p>
+            </div>
+            <TicketIdDisplay 
+              ticketNumber={initialData.ticket_number} 
+              size="medium"
+              showCopyButton={true}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Title Field */}
       <div>
         <label htmlFor="titulo" className="block text-sm font-medium text-gray-700 mb-2">
@@ -120,28 +139,37 @@ const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null 
         </p>
       </div>
 
-      {/* Description Field */}
+      {/* Description Field with Rich Text Editor */}
       <div>
         <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-2">
           Descripción Detallada *
         </label>
-        <textarea
-          id="descripcion"
-          name="descripcion"
-          rows={6}
-          value={formData.descripcion}
-          onChange={handleInputChange}
-          className={`input-field resize-none ${formErrors.descripcion ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}`}
-          placeholder="Proporciona todos los detalles relevantes sobre el problema o solicitud. Incluye pasos para reproducir el problema, mensajes de error, o cualquier información adicional que pueda ser útil."
-          disabled={isLoading}
-          maxLength={2000}
-        />
+        <div className={`${formErrors.descripcion ? 'ring-2 ring-red-300 rounded-md' : ''}`}>
+          <CustomRichTextEditor
+            value={formData.descripcion}
+            onChange={(content) => {
+              setFormData(prev => ({ ...prev, descripcion: content }))
+              // Clear error when user starts typing
+              if (formErrors.descripcion) {
+                setFormErrors(prev => ({ ...prev, descripcion: '' }))
+              }
+            }}
+            placeholder="Proporciona todos los detalles relevantes sobre el problema o solicitud. Puedes usar formato de texto, listas, código e insertar imágenes."
+            disabled={isLoading}
+            enableImageUpload={true}
+            enableVoiceNotes={true}
+            height={250}
+          />
+        </div>
         {formErrors.descripcion && (
           <p className="mt-1 text-sm text-red-600">{formErrors.descripcion}</p>
         )}
-        <p className="mt-1 text-sm text-gray-500">
-          {formData.descripcion.length}/2000 caracteres
-        </p>
+        <div className="mt-2 text-xs text-gray-500">
+          <p>
+            <strong>Consejos:</strong> Incluye pasos para reproducir el problema, mensajes de error, 
+            capturas de pantalla o cualquier información adicional que pueda ser útil.
+          </p>
+        </div>
       </div>
 
       {/* Priority and Type Row */}

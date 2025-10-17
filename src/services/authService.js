@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import securityService from './securityService.js'
 
 /**
  * Authentication service for handling user authentication operations
@@ -9,18 +10,77 @@ class AuthService {
    * Sign in user with email and password
    * @param {string} email - User email
    * @param {string} password - User password
+   * @param {string} clientIdentifier - Client identifier for rate limiting (IP, device ID, etc.)
    * @returns {Promise<{user: Object, session: Object, error: Object|null}>}
    */
-  async signIn(email, password) {
+  async signIn(email, password, clientIdentifier = 'unknown') {
     try {
+      // Apply rate limiting for authentication attempts
+      const rateLimitResult = securityService.checkRateLimit('auth', clientIdentifier)
+      if (!rateLimitResult.allowed) {
+        securityService.logSecurityEvent('auth_rate_limit_exceeded', {
+          email: securityService.sanitizeInput(email, 'email'),
+          clientIdentifier,
+          remaining: rateLimitResult.remaining,
+          resetTime: rateLimitResult.resetTime
+        })
+        
+        return { 
+          user: null, 
+          session: null, 
+          error: { 
+            message: `Too many login attempts. Please try again in ${Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)} seconds.` 
+          }
+        }
+      }
+
+      // Sanitize email input
+      const sanitizedEmail = securityService.sanitizeInput(email, 'email')
+      
+      // Validate email format
+      if (!sanitizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitizedEmail)) {
+        securityService.logSecurityEvent('invalid_email_format', {
+          email: sanitizedEmail,
+          clientIdentifier
+        })
+        
+        return {
+          user: null,
+          session: null,
+          error: { message: 'Invalid email format' }
+        }
+      }
+
+      // Check for suspicious activity
+      securityService.checkSuspiciousActivity(clientIdentifier, 'login_attempt', {
+        email: sanitizedEmail,
+        timestamp: Date.now()
+      })
+
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(),
+        email: sanitizedEmail,
         password
       })
 
       if (error) {
+        // Log failed authentication attempt
+        securityService.logSecurityEvent('auth_failed', {
+          email: sanitizedEmail,
+          clientIdentifier,
+          error: error.message,
+          timestamp: Date.now()
+        })
+        
         return { user: null, session: null, error }
       }
+
+      // Log successful authentication
+      securityService.logSecurityEvent('auth_success', {
+        userId: data.user.id,
+        email: sanitizedEmail,
+        clientIdentifier,
+        timestamp: Date.now()
+      })
 
       // Get user profile data with role information
       const userProfile = await this.getUserProfile(data.user.id)
@@ -64,20 +124,54 @@ class AuthService {
   /**
    * Send password reset email
    * @param {string} email - User email
+   * @param {string} clientIdentifier - Client identifier for rate limiting
    * @returns {Promise<{error: Object|null}>}
    */
-  async resetPassword(email) {
+  async resetPassword(email, clientIdentifier = 'unknown') {
     try {
+      // Apply rate limiting for password reset attempts
+      const rateLimitResult = securityService.checkRateLimit('auth', clientIdentifier)
+      if (!rateLimitResult.allowed) {
+        return { 
+          error: { 
+            message: `Too many password reset attempts. Please try again in ${Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)} seconds.` 
+          }
+        }
+      }
+
+      // Sanitize and validate email
+      const sanitizedEmail = securityService.sanitizeInput(email, 'email')
+      if (!sanitizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitizedEmail)) {
+        return { error: { message: 'Invalid email format' } }
+      }
+
+      // Check for suspicious activity
+      securityService.checkSuspiciousActivity(clientIdentifier, 'password_reset', {
+        email: sanitizedEmail,
+        timestamp: Date.now()
+      })
+
       const { error } = await supabase.auth.resetPasswordForEmail(
-        email.trim().toLowerCase(),
+        sanitizedEmail,
         {
           redirectTo: `${window.location.origin}/reset-password`
         }
       )
 
       if (error) {
+        securityService.logSecurityEvent('password_reset_failed', {
+          email: sanitizedEmail,
+          clientIdentifier,
+          error: error.message
+        })
         return { error }
       }
+
+      securityService.logSecurityEvent('password_reset_requested', {
+        email: sanitizedEmail,
+        clientIdentifier,
+        timestamp: Date.now()
+      })
 
       return { error: null }
     } catch (error) {

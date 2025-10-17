@@ -1,5 +1,6 @@
 import React from 'react'
-import { formatTicketId, getTicketAge, getPriorityConfig, getStateConfig } from '../../utils/helpers'
+import { formatTicketId, getTicketAge, getPriorityConfig, getStateConfig, getTextPreview } from '../../utils/helpers'
+import TicketIdDisplay from './TicketIdDisplay'
 
 const TicketCard = ({ ticket, onClick, showClient = false, showTechnician = false }) => {
   const priorityConfig = getPriorityConfig(ticket.prioridad)
@@ -25,15 +26,23 @@ const TicketCard = ({ ticket, onClick, showClient = false, showTechnician = fals
       onKeyPress={handleKeyPress}
       tabIndex={0}
       role="button"
-      aria-label={`Ver detalles del ticket ${formatTicketId(ticket.id)}`}
+      aria-label={`Ver detalles del ticket ${ticket.ticket_number || formatTicketId(ticket.id)}`}
     >
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm font-mono text-gray-500">
-              {formatTicketId(ticket.id)}
-            </span>
+            {ticket.ticket_number ? (
+              <TicketIdDisplay 
+                ticketNumber={ticket.ticket_number} 
+                size="small"
+                showCopyButton={false}
+              />
+            ) : (
+              <span className="text-sm font-mono text-gray-500">
+                {formatTicketId(ticket.id)}
+              </span>
+            )}
             <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${stateConfig.color}`}>
               {stateConfig.label}
             </span>
@@ -50,8 +59,8 @@ const TicketCard = ({ ticket, onClick, showClient = false, showTechnician = fals
       </div>
 
       {/* Description */}
-      <p className="text-gray-600 text-sm mb-4 line-clamp-2" title={ticket.descripcion}>
-        {ticket.descripcion}
+      <p className="text-gray-600 text-sm mb-4 line-clamp-2" title={getTextPreview(ticket.descripcion, 200)}>
+        {getTextPreview(ticket.descripcion, 120)}
       </p>
 
       {/* Metadata */}

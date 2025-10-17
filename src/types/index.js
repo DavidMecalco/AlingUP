@@ -44,8 +44,9 @@
 /**
  * @typedef {Object} Ticket
  * @property {string} id - Ticket UUID
+ * @property {string} ticket_number - Human-readable ticket ID (e.g., "TKT-2024-001")
  * @property {string} titulo - Ticket title
- * @property {string} descripcion - Ticket description
+ * @property {string} descripcion - Rich text description with HTML formatting
  * @property {string} cliente_id - Client user ID
  * @property {string} [tecnico_id] - Assigned technician ID
  * @property {TicketEstado} estado - Ticket state
