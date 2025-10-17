@@ -126,6 +126,136 @@ export const validateCommentForm = (data) => {
 }
 
 /**
+ * Validate ticket creation form data
+ * @param {Object} data - Ticket form data
+ * @returns {Object} Validation result
+ */
+export const validateCreateTicketForm = (data) => {
+  const errors = {}
+  
+  if (!data.titulo || data.titulo.trim().length === 0) {
+    errors.titulo = 'El título es requerido'
+  } else if (data.titulo.trim().length < 5) {
+    errors.titulo = 'El título debe tener al menos 5 caracteres'
+  } else if (data.titulo.trim().length > 200) {
+    errors.titulo = 'El título no puede exceder 200 caracteres'
+  }
+  
+  if (!data.descripcion || data.descripcion.trim().length === 0) {
+    errors.descripcion = 'La descripción es requerida'
+  } else if (data.descripcion.trim().length < 10) {
+    errors.descripcion = 'La descripción debe tener al menos 10 caracteres'
+  } else if (data.descripcion.trim().length > 2000) {
+    errors.descripcion = 'La descripción no puede exceder 2000 caracteres'
+  }
+  
+  if (!data.prioridad) {
+    errors.prioridad = 'La prioridad es requerida'
+  } else if (!['baja', 'media', 'alta', 'urgente'].includes(data.prioridad)) {
+    errors.prioridad = 'Prioridad inválida'
+  }
+  
+  if (!data.tipo_ticket_id) {
+    errors.tipo_ticket_id = 'El tipo de ticket es requerido'
+  }
+  
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors
+  }
+}
+
+/**
+ * Validate ticket update form data
+ * @param {Object} data - Ticket update data
+ * @returns {Object} Validation result
+ */
+export const validateUpdateTicketForm = (data) => {
+  const errors = {}
+  
+  if (data.titulo !== undefined) {
+    if (!data.titulo || data.titulo.trim().length === 0) {
+      errors.titulo = 'El título es requerido'
+    } else if (data.titulo.trim().length < 5) {
+      errors.titulo = 'El título debe tener al menos 5 caracteres'
+    } else if (data.titulo.trim().length > 200) {
+      errors.titulo = 'El título no puede exceder 200 caracteres'
+    }
+  }
+  
+  if (data.descripcion !== undefined) {
+    if (!data.descripcion || data.descripcion.trim().length === 0) {
+      errors.descripcion = 'La descripción es requerida'
+    } else if (data.descripcion.trim().length < 10) {
+      errors.descripcion = 'La descripción debe tener al menos 10 caracteres'
+    } else if (data.descripcion.trim().length > 2000) {
+      errors.descripcion = 'La descripción no puede exceder 2000 caracteres'
+    }
+  }
+  
+  if (data.prioridad !== undefined) {
+    if (!data.prioridad) {
+      errors.prioridad = 'La prioridad es requerida'
+    } else if (!['baja', 'media', 'alta', 'urgente'].includes(data.prioridad)) {
+      errors.prioridad = 'Prioridad inválida'
+    }
+  }
+  
+  if (data.estado !== undefined) {
+    if (!['abierto', 'en_progreso', 'vobo', 'cerrado'].includes(data.estado)) {
+      errors.estado = 'Estado inválido'
+    }
+  }
+  
+  if (data.tipo_ticket_id !== undefined && !data.tipo_ticket_id) {
+    errors.tipo_ticket_id = 'El tipo de ticket es requerido'
+  }
+  
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors
+  }
+}
+
+/**
+ * Validate ticket state transition
+ * @param {string} currentState - Current ticket state
+ * @param {string} newState - New ticket state
+ * @param {string} userRole - User role making the change
+ * @returns {Object} Validation result
+ */
+export const validateStateTransition = (currentState, newState, userRole) => {
+  const errors = []
+  
+  // Define valid transitions
+  const validTransitions = {
+    'abierto': ['en_progreso'],
+    'en_progreso': ['vobo', 'abierto'],
+    'vobo': ['cerrado', 'en_progreso'],
+    'cerrado': ['abierto'] // Only admins can reopen
+  }
+  
+  // Check if transition is valid
+  if (!validTransitions[currentState]?.includes(newState)) {
+    errors.push(`No se puede cambiar de ${currentState} a ${newState}`)
+  }
+  
+  // Check role permissions
+  if (newState === 'cerrado' && userRole === 'cliente') {
+    errors.push('Solo técnicos y administradores pueden cerrar tickets')
+  }
+  
+  if (currentState === 'cerrado' && newState === 'abierto' && userRole !== 'admin') {
+    errors.push('Solo administradores pueden reabrir tickets cerrados')
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  }
+}
+
+/**
  * Sanitize HTML input to prevent XSS
  * @param {string} input - Input string to sanitize
  * @returns {string} Sanitized string

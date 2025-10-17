@@ -4,6 +4,8 @@ import { AuthProvider } from './contexts/AuthContext'
 import Login from './pages/Login'
 import ResetPassword from './pages/ResetPassword'
 import Dashboard from './pages/Dashboard'
+import Tickets from './pages/Tickets'
+import CreateTicket from './pages/CreateTicket'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -21,6 +23,8 @@ function App() {
             
             {/* Main application routes */}
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/tickets" element={<Tickets />} />
+            <Route path="/tickets/create" element={<CreateTicket />} />
             
             {/* 404 Not Found */}
             <Route path="*" element={<NotFound />} />
