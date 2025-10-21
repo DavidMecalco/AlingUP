@@ -1,59 +1,70 @@
 import PropTypes from 'prop-types';
+import { Sparkles } from 'lucide-react';
 
 /**
- * AlingUP Logo Component
- * Displays the AlingUP brand logo with consistent styling
+ * AlingUP Logo Component with Liquid Glass Design
+ * Displays the AlingUP brand logo with glass morphism effects
  */
 const AlingUPLogo = ({ 
   size = 'md', 
   showIcon = true, 
   showText = true, 
   className = '',
-  variant = 'default' 
+  variant = 'default',
+  animated = false
 }) => {
   const sizeClasses = {
     xs: {
       icon: 'w-6 h-6',
       text: 'text-lg',
-      iconText: 'text-xs'
+      iconSize: 'w-3 h-3'
     },
     sm: {
       icon: 'w-8 h-8',
       text: 'text-xl',
-      iconText: 'text-sm'
+      iconSize: 'w-4 h-4'
     },
     md: {
       icon: 'w-10 h-10',
       text: 'text-2xl',
-      iconText: 'text-sm'
+      iconSize: 'w-5 h-5'
     },
     lg: {
       icon: 'w-12 h-12',
       text: 'text-3xl',
-      iconText: 'text-base'
+      iconSize: 'w-6 h-6'
     },
     xl: {
       icon: 'w-16 h-16',
       text: 'text-4xl',
-      iconText: 'text-lg'
+      iconSize: 'w-8 h-8'
     }
   };
 
   const variantClasses = {
     default: {
-      icon: 'bg-gradient-to-br from-purple-600 to-indigo-600',
+      icon: 'glass-morphism bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-white/30',
       text: 'text-purple-600',
-      textSecondary: 'text-gray-900'
+      textSecondary: 'text-gray-900',
+      iconColor: 'text-purple-600'
     },
     light: {
-      icon: 'bg-gradient-to-br from-purple-100 to-indigo-100',
-      text: 'text-purple-100',
-      textSecondary: 'text-white'
+      icon: 'glass-morphism bg-gradient-to-br from-white/20 to-white/10 border-white/40',
+      text: 'text-white',
+      textSecondary: 'text-white/90',
+      iconColor: 'text-white'
     },
     dark: {
-      icon: 'bg-gradient-to-br from-purple-800 to-indigo-800',
-      text: 'text-purple-800',
-      textSecondary: 'text-gray-800'
+      icon: 'glass-morphism-dark bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-white/10',
+      text: 'text-purple-300',
+      textSecondary: 'text-gray-100',
+      iconColor: 'text-purple-300'
+    },
+    glass: {
+      icon: 'glass-card bg-gradient-to-br from-purple-500/10 to-indigo-500/10',
+      text: 'text-purple-600',
+      textSecondary: 'text-gray-900',
+      iconColor: 'text-purple-600'
     }
   };
 
@@ -63,17 +74,27 @@ const AlingUPLogo = ({
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
       {showIcon && (
-        <div className={`${currentSize.icon} ${currentVariant.icon} rounded-lg flex items-center justify-center shadow-sm`}>
-          <span className={`text-white font-bold ${currentSize.iconText}`}>
-            AU
-          </span>
+        <div className={`
+          ${currentSize.icon} 
+          ${currentVariant.icon} 
+          rounded-2xl 
+          flex items-center justify-center 
+          transition-all duration-300 ease-out
+          hover:scale-105 hover:shadow-glass-hover
+          ${animated ? 'glass-float' : ''}
+        `}>
+          <Sparkles className={`${currentSize.iconSize} ${currentVariant.iconColor}`} />
         </div>
       )}
       
       {showText && (
-        <h1 className={`font-bold ${currentSize.text}`}>
-          <span className={currentVariant.text}>Aling</span>
-          <span className={currentVariant.textSecondary}>UP</span>
+        <h1 className={`font-bold ${currentSize.text} tracking-tight`}>
+          <span className={`${currentVariant.text} transition-colors duration-300`}>
+            Aling
+          </span>
+          <span className={`${currentVariant.textSecondary} transition-colors duration-300`}>
+            UP
+          </span>
         </h1>
       )}
     </div>
@@ -85,7 +106,8 @@ AlingUPLogo.propTypes = {
   showIcon: PropTypes.bool,
   showText: PropTypes.bool,
   className: PropTypes.string,
-  variant: PropTypes.oneOf(['default', 'light', 'dark'])
+  variant: PropTypes.oneOf(['default', 'light', 'dark', 'glass']),
+  animated: PropTypes.bool
 };
 
 export default AlingUPLogo;

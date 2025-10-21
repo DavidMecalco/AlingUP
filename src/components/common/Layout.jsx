@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import SkipLink from './SkipLink';
+import '../../styles/glass.css';
 
 const Layout = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -40,34 +41,46 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Skip link for keyboard navigation */}
-      <SkipLink />
-      
-      {/* Header */}
-      <Header 
-        onMenuToggle={toggleMobileMenu}
-        isMobileMenuOpen={isMobileMenuOpen}
-      />
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
+        {/* Floating Glass Orbs */}
+        <div className="absolute top-20 left-20 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-40 right-32 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
+        <div className="absolute bottom-32 left-1/3 w-80 h-80 bg-indigo-500/8 rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 right-20 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl animate-float" style={{animationDelay: '0.5s'}}></div>
+      </div>
 
-      <div className="flex h-[calc(100vh-4rem)]">
-        {/* Sidebar */}
-        <Sidebar 
-          isOpen={isMobileMenuOpen}
-          onClose={closeMobileMenu}
+      {/* Content */}
+      <div className="relative z-10 min-h-screen">
+        {/* Skip link for keyboard navigation */}
+        <SkipLink />
+        
+        {/* Header */}
+        <Header 
+          onMenuToggle={toggleMobileMenu}
+          isMobileMenuOpen={isMobileMenuOpen}
         />
 
-        {/* Main content */}
-        <main 
-          id="main-content"
-          className="flex-1 overflow-auto"
-          role="main"
-          aria-label="Contenido principal"
-        >
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl">
-            {children}
-          </div>
-        </main>
+        <div className="flex h-[calc(100vh-4rem)]">
+          {/* Sidebar */}
+          <Sidebar 
+            isOpen={isMobileMenuOpen}
+            onClose={closeMobileMenu}
+          />
+
+          {/* Main content */}
+          <main 
+            id="main-content"
+            className="flex-1 overflow-auto"
+            role="main"
+            aria-label="Contenido principal"
+          >
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl">
+              {children}
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   );
