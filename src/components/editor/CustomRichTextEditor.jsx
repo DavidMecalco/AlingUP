@@ -1,5 +1,20 @@
 import { useRef, useState, useEffect } from 'react'
 import VoiceRecorderButton from './VoiceRecorderButton'
+import { 
+  Bold, 
+  Italic, 
+  Underline, 
+  List, 
+  ListOrdered, 
+  Code, 
+  Image, 
+  Paperclip, 
+  Mic,
+  Maximize2,
+  Minimize2,
+  Check,
+  X
+} from 'lucide-react'
 import './CustomRichTextEditor.css'
 
 const CustomRichTextEditor = ({
@@ -20,8 +35,14 @@ const CustomRichTextEditor = ({
 
     // Sync value with editor content
     useEffect(() => {
-        if (editorRef.current && value !== editorRef.current.innerHTML) {
-            editorRef.current.innerHTML = value || ''
+        if (editorRef.current) {
+            const currentContent = editorRef.current.innerHTML
+            const newValue = value || ''
+            
+            // Only update if content is different to avoid cursor issues
+            if (currentContent !== newValue) {
+                editorRef.current.innerHTML = newValue
+            }
         }
     }, [value])
 
@@ -30,6 +51,14 @@ const CustomRichTextEditor = ({
             const content = editorRef.current.innerHTML
             onChange(content)
         }
+    }
+
+    // Handle paste events to clean up formatting
+    const handlePaste = (e) => {
+        e.preventDefault()
+        const text = e.clipboardData.getData('text/plain')
+        document.execCommand('insertText', false, text)
+        handleContentChange()
     }
 
     const insertAtCursor = (html) => {
@@ -66,31 +95,79 @@ const CustomRichTextEditor = ({
         if (editorRef.current) {
             editorRef.current.focus()
             
-            // Use modern approach instead of deprecated execCommand
-            const selection = window.getSelection()
-            if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0)
-                const selectedText = range.toString()
+            // Use execCommand for better compatibility
+            try {
+                document.execCommand(command, false, null)
+                handleContentChange()
+            } catch (error) {
+                console.warn('Format command failed:', error)
                 
-                if (selectedText) {
-                    let wrappedText = ''
-                    switch (command) {
-                        case 'bold':
-                            wrappedText = `<strong>${selectedText}</strong>`
-                            break
-                        case 'italic':
-                            wrappedText = `<em>${selectedText}</em>`
-                            break
-                        case 'underline':
-                            wrappedText = `<u>${selectedText}</u>`
-                            break
-                        default:
-                            wrappedText = selectedText
+                // Fallback to manual formatting
+                const selection = window.getSelection()
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0)
+                    const selectedText = range.toString()
+                    
+                    if (selectedText) {
+                        let wrappedText = ''
+                        switch (command) {
+                            case 'bold':
+                                wrappedText = `<strong>${selectedText}</strong>`
+                                break
+                            case 'italic':
+                                wrappedText = `<em>${selectedText}</em>`
+                                break
+                            case 'underline':
+                                wrappedText = `<u>${selectedText}</u>`
+                                break
+                            default:
+                                wrappedText = selectedText
+                        }
+                        
+                        range.deleteContents()
+                        const div = document.createElement('div')
+                        div.innerHTML = wrappedText
+                        const fragment = document.createDocumentFragment()
+                        while (div.firstChild) {
+                            fragment.appendChild(div.firstChild)
+                        }
+                        range.insertNode(fragment)
+                        range.collapse(false)
+                        selection.removeAllRanges()
+                        selection.addRange(range)
+                        
+                        handleContentChange()
                     }
+                }
+            }
+        }
+    }
+
+    const createList = (ordered = false) => {
+        if (editorRef.current) {
+            editorRef.current.focus()
+            
+            try {
+                // Use execCommand for better list handling
+                const command = ordered ? 'insertOrderedList' : 'insertUnorderedList'
+                document.execCommand(command, false, null)
+                handleContentChange()
+            } catch (error) {
+                console.warn('List command failed:', error)
+                
+                // Fallback to manual list creation
+                const selection = window.getSelection()
+                if (selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0)
+                    const selectedText = range.toString() || 'Elemento de lista'
+                    
+                    const listHtml = ordered 
+                        ? `<ol><li>${selectedText}</li></ol><br/>`
+                        : `<ul><li>${selectedText}</li></ul><br/>`
                     
                     range.deleteContents()
                     const div = document.createElement('div')
-                    div.innerHTML = wrappedText
+                    div.innerHTML = listHtml
                     const fragment = document.createDocumentFragment()
                     while (div.firstChild) {
                         fragment.appendChild(div.firstChild)
@@ -102,36 +179,6 @@ const CustomRichTextEditor = ({
                     
                     handleContentChange()
                 }
-            }
-        }
-    }
-
-    const createList = (ordered = false) => {
-        if (editorRef.current) {
-            editorRef.current.focus()
-            
-            const selection = window.getSelection()
-            if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0)
-                const selectedText = range.toString() || 'Elemento de lista'
-                
-                const listHtml = ordered 
-                    ? `<ol><li>${selectedText}</li></ol><br/>`
-                    : `<ul><li>${selectedText}</li></ul><br/>`
-                
-                range.deleteContents()
-                const div = document.createElement('div')
-                div.innerHTML = listHtml
-                const fragment = document.createDocumentFragment()
-                while (div.firstChild) {
-                    fragment.appendChild(div.firstChild)
-                }
-                range.insertNode(fragment)
-                range.collapse(false)
-                selection.removeAllRanges()
-                selection.addRange(range)
-                
-                handleContentChange()
             }
         }
     }
@@ -153,10 +200,10 @@ const CustomRichTextEditor = ({
     const handleFileAttachment = (e) => {
         const file = e.target.files[0]
         if (file) {
-            const fileSize = (file.size / 1024).toFixed(1) + ' KB'
-            const attachment = `<div style="background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 6px; padding: 8px; margin: 8px 0; display: inline-block; font-family: system-ui;">
-        📎 <strong>Archivo adjunto:</strong> ${file.name} (${fileSize})
-      </div><br/>`
+            const fileSize = file.size > 1024 * 1024 
+                ? (file.size / (1024 * 1024)).toFixed(1) + ' MB'
+                : (file.size / 1024).toFixed(1) + ' KB'
+            const attachment = `<div class="attachment">📎 <strong>Archivo adjunto:</strong> ${file.name} (${fileSize})</div><br/>`
             insertAtCursor(attachment)
         }
         // Reset input
@@ -170,7 +217,13 @@ const CustomRichTextEditor = ({
 
     const handleCodeSubmit = () => {
         if (codeInput.trim()) {
-            const codeBlock = `<pre style="background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 6px; padding: 12px; font-family: 'Courier New', monospace; overflow-x: auto; margin: 10px 0; white-space: pre-wrap;"><code>${codeInput}</code></pre><br/>`
+            const escapedCode = codeInput
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+            const codeBlock = `<pre><code>${escapedCode}</code></pre><br/>`
             insertAtCursor(codeBlock)
         }
         setShowCodeInput(false)
@@ -187,93 +240,93 @@ const CustomRichTextEditor = ({
     }
 
     return (
-        <div className="rich-text-editor border border-gray-300 rounded-lg overflow-hidden">
-            {/* Toolbar */}
-            <div className="bg-gray-50 border-b border-gray-200 p-2">
-                <div className="flex flex-wrap gap-1">
+        <div className="rich-text-editor glass-morphism rounded-2xl overflow-hidden">
+            {/* Glass Toolbar */}
+            <div className="toolbar glass-morphism border-b border-white/10 p-3">
+                <div className="flex flex-wrap gap-2">
                     {/* Text Formatting */}
-                    <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
+                    <div className="flex gap-2 border-r border-white/20 pr-3 mr-3">
                         <button
                             type="button"
                             onClick={() => formatText('bold')}
-                            className="toolbar-btn"
+                            className="toolbar-btn glass-button p-2 rounded-xl"
                             title="Negrita"
                             disabled={disabled}
                         >
-                            <strong>B</strong>
+                            <Bold className="w-4 h-4" />
                         </button>
                         <button
                             type="button"
                             onClick={() => formatText('italic')}
-                            className="toolbar-btn"
+                            className="toolbar-btn glass-button p-2 rounded-xl"
                             title="Cursiva"
                             disabled={disabled}
                         >
-                            <em>I</em>
+                            <Italic className="w-4 h-4" />
                         </button>
                         <button
                             type="button"
                             onClick={() => formatText('underline')}
-                            className="toolbar-btn"
+                            className="toolbar-btn glass-button p-2 rounded-xl"
                             title="Subrayado"
                             disabled={disabled}
                         >
-                            <u>U</u>
+                            <Underline className="w-4 h-4" />
                         </button>
                     </div>
 
                     {/* Lists */}
-                    <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
+                    <div className="flex gap-2 border-r border-white/20 pr-3 mr-3">
                         <button
                             type="button"
                             onClick={() => createList(false)}
-                            className="toolbar-btn"
+                            className="toolbar-btn glass-button p-2 rounded-xl"
                             title="Lista con viñetas"
                             disabled={disabled}
                         >
-                            • Lista
+                            <List className="w-4 h-4" />
                         </button>
                         <button
                             type="button"
                             onClick={() => createList(true)}
-                            className="toolbar-btn"
+                            className="toolbar-btn glass-button p-2 rounded-xl"
                             title="Lista numerada"
                             disabled={disabled}
                         >
-                            1. Lista
+                            <ListOrdered className="w-4 h-4" />
                         </button>
                     </div>
 
                     {/* Code and Media */}
-                    <div className="flex gap-1 border-r border-gray-300 pr-2 mr-2">
+                    <div className="flex gap-2 border-r border-white/20 pr-3 mr-3">
                         <button
                             type="button"
                             onClick={insertCodeBlock}
-                            className="toolbar-btn"
+                            className="toolbar-btn glass-button p-2 rounded-xl"
                             title="Insertar código"
                             disabled={disabled}
                         >
-                            💻 Código
+                            <Code className="w-4 h-4" />
                         </button>
                         {enableImageUpload && (
                             <button
                                 type="button"
                                 onClick={() => imageInputRef.current?.click()}
-                                className="toolbar-btn"
+                                className="toolbar-btn glass-button p-2 rounded-xl"
                                 title="Insertar imagen"
                                 disabled={disabled}
                             >
-                                🖼️ Imagen
+                                <Image className="w-4 h-4" />
                             </button>
                         )}
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="toolbar-btn"
+                            className="toolbar-btn glass-button p-2 rounded-xl"
                             title="Adjuntar archivo"
                             disabled={disabled}
                         >
-                            📎 Adjunto
+                            <Paperclip className="w-4 h-4" />
                         </button>
                     </div>
 
@@ -281,26 +334,29 @@ const CustomRichTextEditor = ({
                     <button
                         type="button"
                         onClick={toggleExpanded}
-                        className="toolbar-btn ml-auto"
+                        className="toolbar-btn glass-button p-2 rounded-xl ml-auto"
                         title={isExpanded ? "Contraer" : "Expandir"}
                         disabled={disabled}
                     >
-                        {isExpanded ? "⬇️" : "⬆️"}
+                        {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                     </button>
                 </div>
             </div>
 
             {/* Code Input Modal */}
             {showCodeInput && (
-                <div className="bg-blue-50 border-b border-blue-200 p-3">
-                    <div className="mb-2">
-                        <label className="block text-sm font-medium text-blue-800 mb-1">
-                            Insertar código:
-                        </label>
+                <div className="glass-morphism bg-blue-500/10 border-b border-white/10 p-4 animate-slide-in">
+                    <div className="mb-3">
+                        <div className="flex items-center space-x-2 mb-2">
+                            <Code className="w-4 h-4 text-blue-400" />
+                            <label className="text-sm font-medium text-white">
+                                Insertar código:
+                            </label>
+                        </div>
                         <textarea
                             value={codeInput}
                             onChange={(e) => setCodeInput(e.target.value)}
-                            className="w-full p-2 border border-blue-300 rounded font-mono text-sm"
+                            className="glass-input w-full p-3 rounded-xl font-mono text-sm text-white placeholder-white/50 bg-black/20"
                             rows={4}
                             placeholder="Escribe tu código aquí..."
                             autoFocus
@@ -310,16 +366,18 @@ const CustomRichTextEditor = ({
                         <button
                             type="button"
                             onClick={handleCodeSubmit}
-                            className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                            className="glass-button px-4 py-2 rounded-xl text-white font-medium bg-green-500/20 hover:bg-green-500/30 transition-all duration-200 flex items-center space-x-2"
                         >
-                            Insertar
+                            <Check className="w-4 h-4" />
+                            <span>Insertar</span>
                         </button>
                         <button
                             type="button"
                             onClick={handleCodeCancel}
-                            className="px-3 py-1 bg-gray-300 text-gray-700 rounded text-sm hover:bg-gray-400"
+                            className="glass-button px-4 py-2 rounded-xl text-white font-medium bg-red-500/20 hover:bg-red-500/30 transition-all duration-200 flex items-center space-x-2"
                         >
-                            Cancelar
+                            <X className="w-4 h-4" />
+                            <span>Cancelar</span>
                         </button>
                     </div>
                 </div>
@@ -331,13 +389,16 @@ const CustomRichTextEditor = ({
                 contentEditable={!disabled}
                 onInput={handleContentChange}
                 onBlur={handleContentChange}
-                className="p-3 focus:outline-none overflow-y-auto prose max-w-none"
+                onPaste={handlePaste}
+                className="editor-content p-4 focus:outline-none overflow-y-auto text-white"
                 style={{
                     minHeight: `${height}px`,
                     maxHeight: isExpanded ? '600px' : `${height}px`,
                     direction: 'ltr',
                     textAlign: 'left',
-                    unicodeBidi: 'normal'
+                    unicodeBidi: 'normal',
+                    lineHeight: '1.6',
+                    fontSize: '14px'
                 }}
                 data-placeholder={placeholder}
                 suppressContentEditableWarning={true}
@@ -361,15 +422,18 @@ const CustomRichTextEditor = ({
 
             {/* Voice Recording Controls */}
             {enableVoiceNotes && (
-                <div className="p-3 bg-gray-50 border-t border-gray-200">
+                <div className="glass-morphism border-t border-white/10 p-4">
                     <div className="flex items-center justify-between">
-                        <div className="text-sm text-gray-600">
-                            <strong>Nota de Voz:</strong> Graba audio para complementar tu descripción
+                        <div className="flex items-center space-x-2">
+                            <Mic className="w-4 h-4 text-green-400" />
+                            <div className="text-sm text-white/80">
+                                <strong className="text-white">Nota de Voz:</strong> Graba audio para complementar tu descripción
+                            </div>
                         </div>
                         <VoiceRecorderButton
                             onRecording={(audioBlob) => {
                                 console.log('Audio recorded:', audioBlob)
-                                const audioNote = `<div style="background: #dbeafe; border: 1px solid #3b82f6; border-radius: 6px; padding: 8px; margin: 8px 0; display: inline-block; font-family: system-ui;">
+                                const audioNote = `<div class="voice-note">
                   🎤 <strong>Nota de voz grabada</strong> (${(audioBlob.size / 1024).toFixed(1)} KB)
                 </div><br/>`
                                 insertAtCursor(audioNote)
@@ -381,18 +445,18 @@ const CustomRichTextEditor = ({
             )}
 
             {/* Help Text */}
-            <div className="p-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-500 space-y-1">
+            <div className="glass-morphism border-t border-white/10 p-3 text-xs text-white/70 space-y-1">
                 <p>
-                    <strong>Formato disponible:</strong> Negrita, cursiva, subrayado, listas, código
+                    <strong className="text-white/90">Formato disponible:</strong> Negrita, cursiva, subrayado, listas, código
                 </p>
                 {enableImageUpload && (
                     <p>
-                        <strong>Multimedia:</strong> Imágenes (JPG/PNG), archivos adjuntos (PDF, DOC, ZIP)
+                        <strong className="text-white/90">Multimedia:</strong> Imágenes (JPG/PNG), archivos adjuntos (PDF, DOC, ZIP)
                     </p>
                 )}
                 {enableVoiceNotes && (
                     <p>
-                        <strong>Audio:</strong> Graba notas de voz para complementar tu descripción
+                        <strong className="text-white/90">Audio:</strong> Graba notas de voz para complementar tu descripción
                     </p>
                 )}
             </div>

@@ -191,17 +191,34 @@ class TicketService {
    */
   async validateClienteId(clienteId) {
     try {
+      console.log('Validating cliente_id:', clienteId)
+      
       const { data: user, error } = await supabase
         .from('users')
-        .select('id, rol, estado')
+        .select('id, rol, estado, email, nombre_completo')
         .eq('id', clienteId)
         .single()
 
-      if (error || !user) {
+      console.log('User validation result:', { user, error })
+
+      if (error) {
+        console.error('Database error during user validation:', error)
+        
+        // If user not found, try to create user profile
+        if (error.code === 'PGRST116') {
+          console.log('User not found in users table, attempting to create profile...')
+          return await this.createUserProfileIfNeeded(clienteId)
+        }
+        
         return { 
           isValid: false, 
-          error: { message: 'Usuario no encontrado o inválido' }
+          error: { message: `Error de base de datos: ${error.message}` }
         }
+      }
+
+      if (!user) {
+        console.log('User not found, attempting to create profile...')
+        return await this.createUserProfileIfNeeded(clienteId)
       }
 
       // Check if user is active
@@ -216,16 +233,104 @@ class TicketService {
       if (!['cliente', 'admin'].includes(user.rol)) {
         return { 
           isValid: false, 
-          error: { message: 'Solo clientes y administradores pueden crear tickets' }
+          error: { message: `Rol no autorizado: ${user.rol}. Solo clientes y administradores pueden crear tickets` }
         }
       }
       
+      console.log('User validation successful:', user)
       return { isValid: true, error: null }
     } catch (error) {
       console.error('Cliente validation error:', error)
       return { 
         isValid: false, 
-        error: { message: 'Error al validar usuario' }
+        error: { message: `Error al validar usuario: ${error.message}` }
+      }
+    }
+  }
+
+  /**
+   * Create user profile if it doesn't exist (for users authenticated via Supabase Auth)
+   * @param {string} userId - User ID from Supabase Auth
+   * @returns {Promise<{isValid: boolean, error: Object|null}>}
+   */
+  async createUserProfileIfNeeded(userId) {
+    try {
+      console.log('Attempting to create user profile for:', userId)
+      
+      // Get user info from Supabase Auth
+      const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(userId)
+      
+      if (authError || !authUser.user) {
+        console.error('Error getting auth user:', authError)
+        
+        // Fallback: try to get current user session
+        const { data: { user: sessionUser } } = await supabase.auth.getUser()
+        
+        if (!sessionUser || sessionUser.id !== userId) {
+          return {
+            isValid: false,
+            error: { message: 'Usuario no encontrado en el sistema de autenticación' }
+          }
+        }
+        
+        // Use session user data
+        const userData = {
+          id: sessionUser.id,
+          email: sessionUser.email,
+          nombre_completo: sessionUser.user_metadata?.full_name || sessionUser.email.split('@')[0],
+          rol: 'cliente', // Default role
+          estado: true
+        }
+        
+        console.log('Creating user profile with session data:', userData)
+        
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert(userData)
+        
+        if (insertError) {
+          console.error('Error creating user profile:', insertError)
+          return {
+            isValid: false,
+            error: { message: `Error al crear perfil de usuario: ${insertError.message}` }
+          }
+        }
+        
+        console.log('User profile created successfully')
+        return { isValid: true, error: null }
+      }
+      
+      // Create user profile with auth data
+      const userData = {
+        id: authUser.user.id,
+        email: authUser.user.email,
+        nombre_completo: authUser.user.user_metadata?.full_name || authUser.user.email.split('@')[0],
+        rol: 'cliente', // Default role
+        estado: true
+      }
+      
+      console.log('Creating user profile with auth data:', userData)
+      
+      const { error: insertError } = await supabase
+        .from('users')
+        .insert(userData)
+      
+      if (insertError) {
+        console.error('Error creating user profile:', insertError)
+        return {
+          isValid: false,
+          error: { message: `Error al crear perfil de usuario: ${insertError.message}` }
+        }
+      }
+      
+      console.log('User profile created successfully')
+      return { isValid: true, error: null }
+      
+    } catch (error) {
+      console.error('Error in createUserProfileIfNeeded:', error)
+      return {
+        isValid: false,
+        error: { message: `Error al crear perfil: ${error.message}` }
       }
     }
   }
@@ -479,6 +584,7 @@ class TicketService {
    */
   async getTicketTypes(activeOnly = true) {
     try {
+      // First, try to get ticket types normally
       let query = supabase
         .from('ticket_types')
         .select('*')
@@ -493,6 +599,15 @@ class TicketService {
       if (error) {
         console.error('Get ticket types error:', error)
         return { data: [], error }
+      }
+
+      // If no data found, try to seed default types
+      if (!data || data.length === 0) {
+        console.log('No ticket types found, attempting to seed...')
+        
+        // Import the seeding function dynamically to avoid circular imports
+        const { getTicketTypesWithFallback } = await import('../utils/seedTicketTypes.js')
+        return await getTicketTypesWithFallback()
       }
 
       return { data: data || [], error: null }

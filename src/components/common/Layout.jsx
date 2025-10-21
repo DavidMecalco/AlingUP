@@ -62,7 +62,7 @@ const Layout = ({ children }) => {
           isMobileMenuOpen={isMobileMenuOpen}
         />
 
-        <div className="flex h-[calc(100vh-4rem)]">
+        <div className="flex min-h-[calc(100vh-4rem)]">
           {/* Sidebar */}
           <Sidebar 
             isOpen={isMobileMenuOpen}
@@ -72,13 +72,11 @@ const Layout = ({ children }) => {
           {/* Main content */}
           <main 
             id="main-content"
-            className="flex-1 overflow-auto"
+            className="flex-1"
             role="main"
             aria-label="Contenido principal"
           >
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl">
-              {children}
-            </div>
+            {children}
           </main>
         </div>
       </div>

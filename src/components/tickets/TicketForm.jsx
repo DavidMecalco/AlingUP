@@ -4,6 +4,18 @@ import { TICKET_PRIORITIES } from '../../utils/constants'
 import ticketService from '../../services/ticketService'
 import CustomRichTextEditor from '../editor/CustomRichTextEditor'
 import TicketIdDisplay from './TicketIdDisplay'
+import DatabaseStatus from '../debug/DatabaseStatus'
+import { 
+  Type, 
+  FileText, 
+  AlertTriangle, 
+  Tag, 
+  Save, 
+  X,
+  Loader,
+  Hash
+} from 'lucide-react'
+import '../../styles/glass.css'
 
 const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null, showTicketId = false }) => {
   const [formData, setFormData] = useState({
@@ -16,24 +28,32 @@ const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null,
   const [formErrors, setFormErrors] = useState({})
   const [ticketTypes, setTicketTypes] = useState([])
   const [isLoadingTypes, setIsLoadingTypes] = useState(true)
+  const [showDebugInfo, setShowDebugInfo] = useState(false)
+  const [databaseReady, setDatabaseReady] = useState(false)
 
   // Load ticket types on component mount
   useEffect(() => {
     const loadTicketTypes = async () => {
       setIsLoadingTypes(true)
       try {
+        console.log('Loading ticket types...')
         const { data, error } = await ticketService.getTicketTypes()
+        console.log('Ticket types response:', { data, error })
+        
         if (error) {
           console.error('Error loading ticket types:', error)
+          setTicketTypes([])
         } else {
-          setTicketTypes(data)
+          console.log('Ticket types loaded:', data)
+          setTicketTypes(data || [])
           // Set first type as default if no initial data
-          if (data.length > 0 && !initialData) {
+          if (data && data.length > 0 && !initialData) {
             setFormData(prev => ({ ...prev, tipo_ticket_id: data[0].id }))
           }
         }
       } catch (error) {
         console.error('Error loading ticket types:', error)
+        setTicketTypes([])
       } finally {
         setIsLoadingTypes(false)
       }
@@ -100,11 +120,16 @@ const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null,
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Ticket ID Display (for existing tickets or after creation) */}
       {showTicketId && initialData?.ticket_number && (
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div className="glass-morphism rounded-2xl p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-1">ID del Ticket</h3>
-              <p className="text-xs text-gray-500">Usa este ID para dar seguimiento a tu ticket</p>
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 glass-morphism rounded-2xl flex items-center justify-center">
+                <Hash className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-white mb-1">ID del Ticket</h3>
+                <p className="text-xs text-white/60">Usa este ID para dar seguimiento</p>
+              </div>
             </div>
             <TicketIdDisplay 
               ticketNumber={initialData.ticket_number} 
@@ -116,35 +141,57 @@ const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null,
       )}
 
       {/* Title Field */}
-      <div>
-        <label htmlFor="titulo" className="block text-sm font-medium text-gray-700 mb-2">
-          Título del Ticket *
-        </label>
-        <input
-          type="text"
-          id="titulo"
-          name="titulo"
-          value={formData.titulo}
-          onChange={handleInputChange}
-          className={`input-field ${formErrors.titulo ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}`}
-          placeholder="Describe brevemente el problema o solicitud"
-          disabled={isLoading}
-          maxLength={200}
-        />
+      <div className="space-y-3">
+        <div className="flex items-center space-x-2">
+          <Type className="w-5 h-5 text-purple-400" />
+          <label htmlFor="titulo" className="text-sm font-medium text-white">
+            Título del Ticket *
+          </label>
+        </div>
+        <div className="relative">
+          <input
+            type="text"
+            id="titulo"
+            name="titulo"
+            value={formData.titulo}
+            onChange={handleInputChange}
+            className={`glass-input w-full px-4 py-4 rounded-2xl text-white placeholder-white/50 transition-all duration-300 ${
+              formErrors.titulo 
+                ? 'ring-2 ring-red-400/50 border-red-400/50' 
+                : 'focus:ring-2 focus:ring-purple-400/50'
+            }`}
+            placeholder="Describe brevemente el problema o solicitud"
+            disabled={isLoading}
+            maxLength={200}
+          />
+        </div>
         {formErrors.titulo && (
-          <p className="mt-1 text-sm text-red-600">{formErrors.titulo}</p>
+          <p className="text-sm text-red-400 flex items-center space-x-1">
+            <AlertTriangle className="w-4 h-4" />
+            <span>{formErrors.titulo}</span>
+          </p>
         )}
-        <p className="mt-1 text-sm text-gray-500">
-          {formData.titulo.length}/200 caracteres
-        </p>
+        <div className="flex justify-between items-center">
+          <p className="text-xs text-white/60">
+            Sé específico y claro en el título
+          </p>
+          <p className="text-xs text-white/60">
+            {formData.titulo.length}/200
+          </p>
+        </div>
       </div>
 
       {/* Description Field with Rich Text Editor */}
-      <div>
-        <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-2">
-          Descripción Detallada *
-        </label>
-        <div className={`${formErrors.descripcion ? 'ring-2 ring-red-300 rounded-md' : ''}`}>
+      <div className="space-y-3">
+        <div className="flex items-center space-x-2">
+          <FileText className="w-5 h-5 text-indigo-400" />
+          <label htmlFor="descripcion" className="text-sm font-medium text-white">
+            Descripción Detallada *
+          </label>
+        </div>
+        <div className={`glass-morphism rounded-2xl p-1 ${
+          formErrors.descripcion ? 'ring-2 ring-red-400/50' : ''
+        }`}>
           <CustomRichTextEditor
             value={formData.descripcion}
             onChange={(content) => {
@@ -162,11 +209,14 @@ const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null,
           />
         </div>
         {formErrors.descripcion && (
-          <p className="mt-1 text-sm text-red-600">{formErrors.descripcion}</p>
+          <p className="text-sm text-red-400 flex items-center space-x-1">
+            <AlertTriangle className="w-4 h-4" />
+            <span>{formErrors.descripcion}</span>
+          </p>
         )}
-        <div className="mt-2 text-xs text-gray-500">
-          <p>
-            <strong>Consejos:</strong> Incluye pasos para reproducir el problema, mensajes de error, 
+        <div className="glass-morphism rounded-xl p-3">
+          <p className="text-xs text-white/70">
+            <strong className="text-white">Consejos:</strong> Incluye pasos para reproducir el problema, mensajes de error, 
             capturas de pantalla o cualquier información adicional que pueda ser útil.
           </p>
         </div>
@@ -175,46 +225,74 @@ const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null,
       {/* Priority and Type Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Priority Field */}
-        <div>
-          <label htmlFor="prioridad" className="block text-sm font-medium text-gray-700 mb-2">
-            Prioridad *
-          </label>
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <AlertTriangle className="w-5 h-5 text-yellow-400" />
+            <label htmlFor="prioridad" className="text-sm font-medium text-white">
+              Prioridad *
+            </label>
+          </div>
           <select
             id="prioridad"
             name="prioridad"
             value={formData.prioridad}
             onChange={handleInputChange}
-            className={`input-field ${formErrors.prioridad ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}`}
+            className={`glass-input w-full px-4 py-4 rounded-2xl text-white bg-white/10 transition-all duration-300 ${
+              formErrors.prioridad 
+                ? 'ring-2 ring-red-400/50 border-red-400/50' 
+                : 'focus:ring-2 focus:ring-purple-400/50'
+            }`}
             disabled={isLoading}
           >
             {priorityOptions.map(option => (
-              <option key={option.value} value={option.value}>
+              <option key={option.value} value={option.value} className="bg-gray-800 text-white">
                 {option.label}
               </option>
             ))}
           </select>
           {formErrors.prioridad && (
-            <p className="mt-1 text-sm text-red-600">{formErrors.prioridad}</p>
+            <p className="text-sm text-red-400 flex items-center space-x-1">
+              <AlertTriangle className="w-4 h-4" />
+              <span>{formErrors.prioridad}</span>
+            </p>
           )}
-          <div className="mt-2 text-sm text-gray-500">
-            <div className="space-y-1">
-              <div><span className="font-medium text-red-600">Urgente:</span> Problemas críticos que afectan operaciones</div>
-              <div><span className="font-medium text-yellow-600">Alta:</span> Problemas importantes que requieren atención pronta</div>
-              <div><span className="font-medium text-blue-600">Media:</span> Problemas normales sin impacto crítico</div>
-              <div><span className="font-medium text-gray-600">Baja:</span> Consultas o mejoras menores</div>
+          <div className="glass-morphism rounded-xl p-3 space-y-2">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+              <span className="text-xs text-white/80"><strong className="text-red-400">Urgente:</strong> Problemas críticos</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+              <span className="text-xs text-white/80"><strong className="text-yellow-400">Alta:</strong> Requiere atención pronta</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <span className="text-xs text-white/80"><strong className="text-blue-400">Media:</strong> Sin impacto crítico</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <span className="text-xs text-white/80"><strong className="text-gray-400">Baja:</strong> Consultas menores</span>
             </div>
           </div>
         </div>
 
         {/* Ticket Type Field */}
-        <div>
-          <label htmlFor="tipo_ticket_id" className="block text-sm font-medium text-gray-700 mb-2">
-            Tipo de Ticket *
-          </label>
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <Tag className="w-5 h-5 text-green-400" />
+            <label htmlFor="tipo_ticket_id" className="text-sm font-medium text-white">
+              Tipo de Ticket *
+            </label>
+          </div>
           {isLoadingTypes ? (
-            <div className="input-field bg-gray-50 flex items-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-600 mr-2"></div>
+            <div className="glass-input w-full px-4 py-4 rounded-2xl flex items-center text-white/70">
+              <Loader className="animate-spin w-4 h-4 mr-2" />
               Cargando tipos...
+            </div>
+          ) : ticketTypes.length === 0 ? (
+            <div className="glass-input w-full px-4 py-4 rounded-2xl flex items-center text-red-400">
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              No hay tipos de tickets disponibles. Contacta al administrador.
             </div>
           ) : (
             <select
@@ -222,24 +300,31 @@ const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null,
               name="tipo_ticket_id"
               value={formData.tipo_ticket_id}
               onChange={handleInputChange}
-              className={`input-field ${formErrors.tipo_ticket_id ? 'border-red-300 focus:ring-red-500 focus:border-red-500' : ''}`}
+              className={`glass-input w-full px-4 py-4 rounded-2xl text-white bg-white/10 transition-all duration-300 ${
+                formErrors.tipo_ticket_id 
+                  ? 'ring-2 ring-red-400/50 border-red-400/50' 
+                  : 'focus:ring-2 focus:ring-purple-400/50'
+              }`}
               disabled={isLoading}
             >
-              <option value="">Selecciona un tipo</option>
+              <option value="" className="bg-gray-800 text-white">Selecciona un tipo</option>
               {ticketTypes.map(type => (
-                <option key={type.id} value={type.id}>
+                <option key={type.id} value={type.id} className="bg-gray-800 text-white">
                   {type.nombre}
                 </option>
               ))}
             </select>
           )}
           {formErrors.tipo_ticket_id && (
-            <p className="mt-1 text-sm text-red-600">{formErrors.tipo_ticket_id}</p>
+            <p className="text-sm text-red-400 flex items-center space-x-1">
+              <AlertTriangle className="w-4 h-4" />
+              <span>{formErrors.tipo_ticket_id}</span>
+            </p>
           )}
           {formData.tipo_ticket_id && (
-            <div className="mt-2">
+            <div className="glass-morphism rounded-xl p-3">
               {ticketTypes.find(t => t.id === formData.tipo_ticket_id)?.descripcion && (
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-white/80">
                   {ticketTypes.find(t => t.id === formData.tipo_ticket_id).descripcion}
                 </p>
               )}
@@ -249,19 +334,22 @@ const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null,
       </div>
 
       {/* Form Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
+      <div className="flex flex-col sm:flex-row gap-4 pt-6">
         <button
           type="submit"
           disabled={isLoading || isLoadingTypes}
-          className="btn-primary flex-1 sm:flex-none sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="glass-button flex-1 sm:flex-none px-8 py-4 rounded-2xl text-white font-medium bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2"
         >
           {isLoading ? (
-            <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              {initialData ? 'Actualizando...' : 'Creando...'}
-            </div>
+            <>
+              <Loader className="animate-spin w-5 h-5" />
+              <span>{initialData ? 'Actualizando...' : 'Creando...'}</span>
+            </>
           ) : (
-            initialData ? 'Actualizar Ticket' : 'Crear Ticket'
+            <>
+              <Save className="w-5 h-5" />
+              <span>{initialData ? 'Actualizar Ticket' : 'Crear Ticket'}</span>
+            </>
           )}
         </button>
         
@@ -270,12 +358,30 @@ const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null,
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="btn-secondary flex-1 sm:flex-none sm:order-1 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="glass-button flex-1 sm:flex-none px-8 py-4 rounded-2xl text-white font-medium bg-red-500/20 hover:bg-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2"
           >
-            Cancelar
+            <X className="w-5 h-5" />
+            <span>Cancelar</span>
           </button>
         )}
       </div>
+
+      {/* Debug Information - Show when there are issues */}
+      {(ticketTypes.length === 0 && !isLoadingTypes) && (
+        <div className="mt-6">
+          <button
+            type="button"
+            onClick={() => setShowDebugInfo(!showDebugInfo)}
+            className="glass-button px-4 py-2 rounded-xl text-white/70 text-sm hover:bg-white/10 transition-colors mb-4"
+          >
+            {showDebugInfo ? 'Ocultar' : 'Mostrar'} información de diagnóstico
+          </button>
+          
+          {showDebugInfo && (
+            <DatabaseStatus onStatusChange={setDatabaseReady} />
+          )}
+        </div>
+      )}
     </form>
   )
 }

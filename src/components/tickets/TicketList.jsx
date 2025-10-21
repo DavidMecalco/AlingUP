@@ -4,6 +4,15 @@ import TicketCard from './TicketCard'
 import { useAuth } from '../../hooks/useAuth'
 import ticketService from '../../services/ticketService'
 import { debounce } from '../../utils/helpers'
+import { 
+  AlertTriangle, 
+  RefreshCw, 
+  Plus, 
+  Ticket,
+  Loader,
+  ChevronDown
+} from 'lucide-react'
+import '../../styles/glass.css'
 
 const TicketList = ({ 
   filters = {}, 
@@ -106,26 +115,26 @@ const TicketList = ({
   // Loading state
   if (isLoading && tickets.length === 0) {
     return (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, index) => (
-          <div key={index} className="card animate-pulse">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {[...Array(6)].map((_, index) => (
+          <div key={index} className="glass-morphism rounded-2xl p-6 animate-pulse">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="h-4 bg-gray-200 rounded w-20"></div>
-                  <div className="h-5 bg-gray-200 rounded w-16"></div>
+                  <div className="h-4 bg-white/20 rounded w-20"></div>
+                  <div className="h-5 bg-white/20 rounded-full w-16"></div>
                 </div>
-                <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-6 bg-white/20 rounded w-3/4"></div>
               </div>
-              <div className="h-5 bg-gray-200 rounded w-12"></div>
+              <div className="h-5 bg-white/20 rounded-full w-12"></div>
             </div>
             <div className="space-y-2 mb-4">
-              <div className="h-4 bg-gray-200 rounded w-full"></div>
-              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+              <div className="h-4 bg-white/20 rounded w-full"></div>
+              <div className="h-4 bg-white/20 rounded w-2/3"></div>
             </div>
-            <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-              <div className="h-4 bg-gray-200 rounded w-24"></div>
-              <div className="h-4 bg-gray-200 rounded w-20"></div>
+            <div className="flex justify-between items-center pt-4 border-t border-white/10">
+              <div className="h-4 bg-white/20 rounded w-24"></div>
+              <div className="h-4 bg-white/20 rounded w-20"></div>
             </div>
           </div>
         ))}
@@ -137,28 +146,23 @@ const TicketList = ({
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="rounded-md bg-red-50 p-4 max-w-md mx-auto">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
+        <div className="glass-morphism rounded-2xl p-8 max-w-md mx-auto bg-red-500/10 border-red-400/20">
+          <div className="flex flex-col items-center space-y-4">
+            <div className="w-16 h-16 glass-morphism rounded-3xl flex items-center justify-center">
+              <AlertTriangle className="w-8 h-8 text-red-400" />
             </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">
+            <div className="text-center">
+              <h3 className="text-lg font-medium text-white mb-2">
                 Error al cargar tickets
               </h3>
-              <div className="mt-2 text-sm text-red-700">
-                <p>{error}</p>
-              </div>
-              <div className="mt-4">
-                <button
-                  onClick={() => loadTickets(1, true)}
-                  className="text-sm bg-red-100 text-red-800 hover:bg-red-200 px-3 py-1 rounded"
-                >
-                  Intentar de nuevo
-                </button>
-              </div>
+              <p className="text-white/70 mb-4">{error}</p>
+              <button
+                onClick={() => loadTickets(1, true)}
+                className="glass-button px-6 py-3 rounded-2xl text-white font-medium bg-red-500/20 hover:bg-red-500/30 transition-all duration-200 flex items-center space-x-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>Intentar de nuevo</span>
+              </button>
             </div>
           </div>
         </div>
@@ -170,23 +174,30 @@ const TicketList = ({
   if (tickets.length === 0) {
     return (
       <div className="text-center py-12">
-        <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          {emptyMessage}
-        </h3>
-        <p className="text-gray-500 mb-6">
-          {emptyDescription}
-        </p>
-        {(user?.profile?.rol === 'cliente' || user?.profile?.rol === 'admin') && (
-          <button
-            onClick={() => navigate('/tickets/create')}
-            className="btn-primary"
-          >
-            Crear Primer Ticket
-          </button>
-        )}
+        <div className="glass-morphism rounded-2xl p-8 max-w-md mx-auto">
+          <div className="flex flex-col items-center space-y-6">
+            <div className="w-20 h-20 glass-morphism rounded-3xl flex items-center justify-center">
+              <Ticket className="w-10 h-10 text-white/40" />
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-medium text-white mb-2">
+                {emptyMessage}
+              </h3>
+              <p className="text-white/70 mb-6">
+                {emptyDescription}
+              </p>
+              {(user?.profile?.rol === 'cliente' || user?.profile?.rol === 'admin') && (
+                <button
+                  onClick={() => navigate('/tickets/create')}
+                  className="glass-button px-6 py-3 rounded-2xl text-white font-medium bg-green-500/20 hover:bg-green-500/30 transition-all duration-200 flex items-center space-x-2 mx-auto"
+                >
+                  <Plus className="w-5 h-5" />
+                  <span>Crear Primer Ticket</span>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
@@ -194,28 +205,35 @@ const TicketList = ({
   return (
     <div className="space-y-6">
       {/* Results Summary */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-700">
-          Mostrando <span className="font-medium">{tickets.length}</span> de{' '}
-          <span className="font-medium">{pagination.count}</span> tickets
-        </p>
-        {pagination.count > 0 && (
-          <div className="text-sm text-gray-500">
-            Página {pagination.page} de {pagination.totalPages}
-          </div>
-        )}
+      <div className="glass-morphism rounded-2xl p-4">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-white/80">
+            Mostrando <span className="font-medium text-white">{tickets.length}</span> de{' '}
+            <span className="font-medium text-white">{pagination.count}</span> tickets
+          </p>
+          {pagination.count > 0 && (
+            <div className="text-sm text-white/60">
+              Página {pagination.page} de {pagination.totalPages}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Tickets Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {tickets.map(ticket => (
-          <TicketCard
+        {tickets.map((ticket, index) => (
+          <div 
             key={ticket.id}
-            ticket={ticket}
-            onClick={handleTicketClick}
-            showClient={showClient}
-            showTechnician={showTechnician}
-          />
+            className="animate-slide-up"
+            style={{animationDelay: `${index * 0.1}s`}}
+          >
+            <TicketCard
+              ticket={ticket}
+              onClick={handleTicketClick}
+              showClient={showClient}
+              showTechnician={showTechnician}
+            />
+          </div>
         ))}
       </div>
 
@@ -225,15 +243,18 @@ const TicketList = ({
           <button
             onClick={handleLoadMore}
             disabled={isLoading}
-            className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="glass-button px-8 py-4 rounded-2xl text-white font-medium bg-blue-500/20 hover:bg-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2 mx-auto"
           >
             {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
-                Cargando...
-              </div>
+              <>
+                <Loader className="animate-spin w-5 h-5" />
+                <span>Cargando...</span>
+              </>
             ) : (
-              `Cargar más tickets (${pagination.count - tickets.length} restantes)`
+              <>
+                <ChevronDown className="w-5 h-5" />
+                <span>Cargar más tickets ({pagination.count - tickets.length} restantes)</span>
+              </>
             )}
           </button>
         </div>
