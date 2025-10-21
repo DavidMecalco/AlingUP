@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Menu, X, User, LogOut, Settings } from 'lucide-react';
+import AlingUPLogo from './AlingUPLogo';
 
 const Header = ({ onMenuToggle, isMobileMenuOpen }) => {
   const { user, logout } = useAuth();
@@ -32,9 +33,7 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }) => {
 
         {/* Logo/Title */}
         <div className="flex items-center">
-          <h1 className="text-xl font-semibold text-gray-900 ml-2 lg:ml-0">
-            Portal de Tickets
-          </h1>
+          <AlingUPLogo size="sm" className="ml-2 lg:ml-0" />
         </div>
 
         {/* User menu */}
@@ -44,8 +43,8 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }) => {
             className="flex items-center space-x-2 p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-200"
             aria-label="Menú de usuario"
           >
-            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-              <User className="h-5 w-5 text-primary-600" />
+            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <User className="h-5 w-5 text-purple-600" />
             </div>
             <span className="hidden sm:block text-sm font-medium">
               {user?.nombre_completo || user?.email}
@@ -59,7 +58,7 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }) => {
                 <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
                   <div className="font-medium">{user?.nombre_completo}</div>
                   <div className="text-gray-500">{user?.email}</div>
-                  <div className="text-xs text-primary-600 capitalize">{user?.rol}</div>
+                  <div className="text-xs text-purple-600 capitalize">{user?.rol}</div>
                 </div>
                 
                 <button

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useToast } from '../../contexts/ToastContext'
+import { Settings, Ticket, Bell, Clock, Zap, Save } from 'lucide-react'
 import LoadingSpinner from '../common/LoadingSpinner'
 
 const SystemSettings = () => {
@@ -103,11 +104,41 @@ const SystemSettings = () => {
   }
 
   const sections = [
-    { id: 'general', name: 'General', icon: '⚙️' },
-    { id: 'tickets', name: 'Tickets', icon: '🎫' },
-    { id: 'notifications', name: 'Notificaciones', icon: '🔔' },
-    { id: 'business', name: 'Horarios', icon: '🕒' },
-    { id: 'sla', name: 'SLA', icon: '⏱️' }
+    { 
+      id: 'general', 
+      name: 'General', 
+      icon: Settings,
+      color: 'from-blue-500 to-indigo-500',
+      bgColor: 'bg-gradient-to-r from-blue-50 to-indigo-50'
+    },
+    { 
+      id: 'tickets', 
+      name: 'Tickets', 
+      icon: Ticket,
+      color: 'from-emerald-500 to-teal-500',
+      bgColor: 'bg-gradient-to-r from-emerald-50 to-teal-50'
+    },
+    { 
+      id: 'notifications', 
+      name: 'Notificaciones', 
+      icon: Bell,
+      color: 'from-purple-500 to-pink-500',
+      bgColor: 'bg-gradient-to-r from-purple-50 to-pink-50'
+    },
+    { 
+      id: 'business', 
+      name: 'Horarios', 
+      icon: Clock,
+      color: 'from-orange-500 to-red-500',
+      bgColor: 'bg-gradient-to-r from-orange-50 to-red-50'
+    },
+    { 
+      id: 'sla', 
+      name: 'SLA', 
+      icon: Zap,
+      color: 'from-yellow-500 to-orange-500',
+      bgColor: 'bg-gradient-to-r from-yellow-50 to-orange-50'
+    }
   ]
 
   const days = [
@@ -128,17 +159,22 @@ const SystemSettings = () => {
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Configuración del Sistema</h2>
-          <p className="text-gray-600">Administra las configuraciones generales del sistema</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div className="flex items-center space-x-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+            <Settings className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Configuración del Sistema</h2>
+            <p className="text-gray-600">Administra las configuraciones generales del sistema</p>
+          </div>
         </div>
         <button
           onClick={handleSaveSettings}
           disabled={loading}
-          className="btn-primary"
+          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl shadow-lg hover:from-green-700 hover:to-emerald-700 transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
           {loading ? (
             <>
@@ -146,35 +182,70 @@ const SystemSettings = () => {
               Guardando...
             </>
           ) : (
-            'Guardar Configuración'
+            <>
+              <Save className="w-5 h-5 mr-2" />
+              Guardar Configuración
+            </>
           )}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Section Navigation */}
         <div className="lg:col-span-1">
-          <nav className="space-y-1">
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(section.id)}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-                  activeSection === section.id
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                <span className="mr-3">{section.icon}</span>
-                {section.name}
-              </button>
-            ))}
+          <nav className="space-y-3">
+            {sections.map((section) => {
+              const Icon = section.icon
+              const isActive = activeSection === section.id
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id)}
+                  className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+                    isActive
+                      ? `${section.bgColor} text-gray-900 shadow-md border-l-4 border-l-transparent bg-gradient-to-r ${section.color.replace('from-', 'border-l-').split(' ')[0].replace('border-l-', '')}`
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center mr-3 ${
+                    isActive ? 'bg-white shadow-sm' : 'bg-gray-100'
+                  }`}>
+                    <Icon className={`w-4 h-4 ${
+                      isActive ? 'text-gray-700' : 'text-gray-500'
+                    }`} />
+                  </div>
+                  {section.name}
+                </button>
+              )
+            })}
           </nav>
         </div>
 
         {/* Settings Content */}
         <div className="lg:col-span-3">
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-xl overflow-hidden">
+            {/* Content Header */}
+            {sections.find(s => s.id === activeSection) && (
+              <div className={`px-8 py-6 ${sections.find(s => s.id === activeSection)?.bgColor} border-b border-gray-100`}>
+                <div className="flex items-center space-x-4">
+                  <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                    {React.createElement(sections.find(s => s.id === activeSection)?.icon, {
+                      className: "w-5 h-5 text-gray-700"
+                    })}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      {sections.find(s => s.id === activeSection)?.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Configura los parámetros de {sections.find(s => s.id === activeSection)?.name.toLowerCase()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <div className="p-8">
             
             {/* General Settings */}
             {activeSection === 'general' && (
@@ -453,7 +524,8 @@ const SystemSettings = () => {
                 </div>
               </div>
             )}
-
+            
+            </div>
           </div>
         </div>
       </div>

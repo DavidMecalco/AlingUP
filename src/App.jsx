@@ -14,6 +14,7 @@ const CreateTicket = React.lazy(() => import('./pages/CreateTicket'))
 const TicketDetailPage = React.lazy(() => import('./pages/TicketDetailPage'))
 const KanbanPage = React.lazy(() => import('./pages/KanbanPage'))
 const AdminSettings = React.lazy(() => import('./components/admin/AdminSettings'))
+const AdminPage = React.lazy(() => import('./pages/AdminPage'))
 const NotFound = React.lazy(() => import('./pages/NotFound'))
 
 // Loading fallback component for lazy loaded routes
@@ -73,6 +74,11 @@ function App() {
                       <Layout>
                         <KanbanPage />
                       </Layout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin" element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdminPage />
                     </ProtectedRoute>
                   } />
                   <Route path="/admin/settings" element={

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
+import { Building2, Users, Settings, Shield, Sparkles } from 'lucide-react'
 import ClientManagement from './ClientManagement'
 import TechnicianManagement from './TechnicianManagement'
 import SystemSettings from './SystemSettings'
@@ -11,15 +12,20 @@ const AdminSettings = () => {
   // Check if user is admin
   if (!user || user.profile?.rol !== 'admin') {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Acceso Restringido</h2>
-          <p className="text-gray-600">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center bg-white rounded-2xl shadow-xl p-12 max-w-md mx-4">
+          <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Shield className="w-10 h-10 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Acceso Restringido</h2>
+          <p className="text-gray-600 leading-relaxed">
             Solo los administradores pueden acceder a la configuración del sistema.
           </p>
+          <div className="mt-6 p-4 bg-red-50 rounded-lg">
+            <p className="text-sm text-red-700">
+              Contacta a tu administrador para obtener los permisos necesarios.
+            </p>
+          </div>
         </div>
       </div>
     )
@@ -29,87 +35,130 @@ const AdminSettings = () => {
     {
       id: 'clients',
       name: 'Gestión de Clientes',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-        </svg>
-      ),
-      description: 'Administrar empresas y organizaciones cliente'
+      icon: Building2,
+      description: 'Administrar empresas y organizaciones cliente',
+      color: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-gradient-to-r from-blue-50 to-cyan-50',
+      iconBg: 'bg-gradient-to-br from-blue-100 to-cyan-100',
+      iconColor: 'text-blue-600'
     },
     {
       id: 'technicians',
       name: 'Gestión de Técnicos',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-      ),
-      description: 'Administrar el equipo de soporte técnico'
+      icon: Users,
+      description: 'Administrar el equipo de soporte técnico',
+      color: 'from-emerald-500 to-teal-500',
+      bgColor: 'bg-gradient-to-r from-emerald-50 to-teal-50',
+      iconBg: 'bg-gradient-to-br from-emerald-100 to-teal-100',
+      iconColor: 'text-emerald-600'
     },
     {
       id: 'system',
       name: 'Configuración del Sistema',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      ),
-      description: 'Configuraciones generales y parámetros del sistema'
+      icon: Settings,
+      description: 'Configuraciones generales y parámetros del sistema',
+      color: 'from-purple-500 to-indigo-500',
+      bgColor: 'bg-gradient-to-r from-purple-50 to-indigo-50',
+      iconBg: 'bg-gradient-to-br from-purple-100 to-indigo-100',
+      iconColor: 'text-purple-600'
     }
   ]
 
+  const activeTabData = tabs.find(tab => tab.id === activeTab)
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Configuración del Sistema
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Panel de administración para gestionar usuarios y configuraciones del sistema
-          </p>
+          <div className="flex items-center space-x-4 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                Panel de Administración
+              </h1>
+              <p className="text-lg text-gray-600 mt-1">
+                Gestiona usuarios y configuraciones del sistema
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Tab Navigation */}
+        {/* Tab Navigation Cards */}
         <div className="mb-8">
-          <div className="border-b border-gray-200">
-            <nav className="-mb-px flex space-x-8">
-              {tabs.map((tab) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              const isActive = activeTab === tab.id
+              return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`group inline-flex items-center py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  className={`group relative overflow-hidden rounded-2xl p-6 text-left transition-all duration-300 transform hover:scale-105 ${
+                    isActive 
+                      ? `${tab.bgColor} ring-2 ring-offset-2 ring-offset-white shadow-xl` 
+                      : 'bg-white hover:bg-gray-50 shadow-md hover:shadow-lg'
                   }`}
                 >
-                  <span className={`mr-2 ${
-                    activeTab === tab.id ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
-                  }`}>
-                    {tab.icon}
-                  </span>
-                  {tab.name}
+                  <div className="flex items-start space-x-4">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                      isActive ? tab.iconBg : 'bg-gray-100 group-hover:bg-gray-200'
+                    }`}>
+                      <Icon className={`w-6 h-6 transition-all duration-300 ${
+                        isActive ? tab.iconColor : 'text-gray-600 group-hover:text-gray-700'
+                      }`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className={`font-semibold text-lg transition-all duration-300 ${
+                        isActive ? 'text-gray-900' : 'text-gray-700 group-hover:text-gray-900'
+                      }`}>
+                        {tab.name}
+                      </h3>
+                      <p className={`text-sm mt-1 transition-all duration-300 ${
+                        isActive ? 'text-gray-700' : 'text-gray-500 group-hover:text-gray-600'
+                      }`}>
+                        {tab.description}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Active indicator */}
+                  {isActive && (
+                    <div className={`absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r ${tab.color}`} />
+                  )}
                 </button>
-              ))}
-            </nav>
-          </div>
-          
-          {/* Tab Description */}
-          <div className="mt-4">
-            <p className="text-sm text-gray-600">
-              {tabs.find(tab => tab.id === activeTab)?.description}
-            </p>
+              )
+            })}
           </div>
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          {activeTab === 'clients' && <ClientManagement />}
-          {activeTab === 'technicians' && <TechnicianManagement />}
-          {activeTab === 'system' && <SystemSettings />}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          {/* Content Header */}
+          <div className={`px-8 py-6 ${activeTabData?.bgColor} border-b border-gray-100`}>
+            <div className="flex items-center space-x-4">
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${activeTabData?.iconBg}`}>
+                {activeTabData && <activeTabData.icon className={`w-5 h-5 ${activeTabData.iconColor}`} />}
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {activeTabData?.name}
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {activeTabData?.description}
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Content Body */}
+          <div className="p-8">
+            {activeTab === 'clients' && <ClientManagement />}
+            {activeTab === 'technicians' && <TechnicianManagement />}
+            {activeTab === 'system' && <SystemSettings />}
+          </div>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
+import AlingUPLogo from '../common/AlingUPLogo'
 
 /**
  * Role-based dashboard navigation component with responsive design
@@ -81,9 +82,7 @@ const DashboardNavigation = () => {
           {/* Logo and Brand */}
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-fuchsia-600">
-                Portal de Tickets
-              </h1>
+              <AlingUPLogo size="sm" />
             </div>
           </div>
 
@@ -93,7 +92,7 @@ const DashboardNavigation = () => {
               <button
                 key={item.path}
                 onClick={() => handleNavigation(item.path)}
-                className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-fuchsia-600 hover:bg-gray-50 transition-colors"
+                className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50 transition-colors"
               >
                 <span className="mr-2">{item.icon}</span>
                 {item.label}
@@ -106,11 +105,11 @@ const DashboardNavigation = () => {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-fuchsia-500 focus:ring-offset-2"
+                className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
               >
                 <div className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-50">
-                  <div className="w-8 h-8 bg-fuchsia-100 rounded-full flex items-center justify-center">
-                    <span className="text-fuchsia-600 font-medium">
+                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                    <span className="text-purple-600 font-medium">
                       {(user?.profile?.nombre_completo || user?.email || 'U').charAt(0).toUpperCase()}
                     </span>
                   </div>
@@ -136,7 +135,7 @@ const DashboardNavigation = () => {
                       {user?.profile?.nombre_completo || user?.email}
                     </p>
                     <p className="text-xs text-gray-500">{user?.email}</p>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-fuchsia-100 text-fuchsia-800 capitalize mt-1">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 capitalize mt-1">
                       {userRole || 'Usuario'}
                     </span>
                   </div>
@@ -179,7 +178,7 @@ const DashboardNavigation = () => {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden ml-2 p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+              className="md:hidden ml-2 p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {isMobileMenuOpen ? (
@@ -200,7 +199,7 @@ const DashboardNavigation = () => {
                 <button
                   key={item.path}
                   onClick={() => handleNavigation(item.path)}
-                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-fuchsia-600 hover:bg-gray-50"
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-gray-50"
                 >
                   <span className="mr-2">{item.icon}</span>
                   {item.label}

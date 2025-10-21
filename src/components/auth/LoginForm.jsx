@@ -89,22 +89,46 @@ const LoginForm = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Iniciar Sesión
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Portal de Gestión de Tickets
-          </p>
+    <div className="min-h-screen flex">
+      {/* Left side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 relative overflow-hidden">
+        <div className="absolute inset-0 bg-black opacity-20"></div>
+        <div className="relative z-10 flex flex-col justify-center items-center text-white p-12">
+          <div className="text-center">
+            <h1 className="text-5xl font-bold mb-4">AlingUP</h1>
+            <p className="text-xl mb-8 opacity-90">Portal de Gestión de Tickets</p>
+            <div className="space-y-4 text-lg opacity-80">
+              <p>✨ Gestión eficiente de tickets</p>
+              <p>🚀 Seguimiento en tiempo real</p>
+              <p>👥 Colaboración mejorada</p>
+            </div>
+          </div>
         </div>
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-y-32 translate-x-32"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full translate-y-24 -translate-x-24"></div>
+      </div>
+
+      {/* Right side - Login Form */}
+      <div className="flex-1 flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div className="text-center">
+            <div className="lg:hidden mb-8">
+              <h1 className="text-4xl font-bold text-purple-600 mb-2">AlingUP</h1>
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Bienvenido de vuelta
+            </h2>
+            <p className="text-gray-600">
+              Ingresa tus credenciales para acceder al portal
+            </p>
+          </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="sr-only">
-                Email
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Correo electrónico
               </label>
               <input
                 id="email"
@@ -112,21 +136,21 @@ const LoginForm = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
+                className={`w-full px-4 py-3 border ${
                   formErrors.email ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm`}
-                placeholder="Dirección de email"
+                } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500`}
+                placeholder="tu@email.com"
                 value={formData.email}
                 onChange={handleInputChange}
                 disabled={isLoading || isSubmitting}
               />
               {formErrors.email && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.email}</p>
+                <p className="mt-2 text-sm text-red-600">{formErrors.email}</p>
               )}
             </div>
             
             <div>
-              <label htmlFor="password" className="sr-only">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Contraseña
               </label>
               <input
@@ -135,16 +159,16 @@ const LoginForm = () => {
                 type="password"
                 autoComplete="current-password"
                 required
-                className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
+                className={`w-full px-4 py-3 border ${
                   formErrors.password ? 'border-red-300' : 'border-gray-300'
-                } placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm`}
-                placeholder="Contraseña"
+                } rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500`}
+                placeholder="••••••••"
                 value={formData.password}
                 onChange={handleInputChange}
                 disabled={isLoading || isSubmitting}
               />
               {formErrors.password && (
-                <p className="mt-1 text-sm text-red-600">{formErrors.password}</p>
+                <p className="mt-2 text-sm text-red-600">{formErrors.password}</p>
               )}
             </div>
           </div>
@@ -169,24 +193,11 @@ const LoginForm = () => {
             </div>
           )}
 
-          <div className="flex items-center justify-between">
-            <div className="text-sm">
-              <button
-                type="button"
-                className="font-medium text-primary-600 hover:text-primary-500"
-                onClick={() => navigate('/reset-password')}
-                disabled={isLoading || isSubmitting}
-              >
-                ¿Olvidaste tu contraseña?
-              </button>
-            </div>
-          </div>
-
           <div>
             <button
               type="submit"
               disabled={isLoading || isSubmitting}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
             >
               {(isLoading || isSubmitting) ? (
                 <div className="flex items-center">
@@ -201,7 +212,19 @@ const LoginForm = () => {
               )}
             </button>
           </div>
+
+          <div className="text-center">
+            <button
+              type="button"
+              className="text-sm font-medium text-purple-600 hover:text-purple-500 transition-colors duration-200"
+              onClick={() => navigate('/reset-password')}
+              disabled={isLoading || isSubmitting}
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
         </form>
+        </div>
       </div>
     </div>
   )

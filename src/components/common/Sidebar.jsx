@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
@@ -6,7 +5,6 @@ import {
   Ticket, 
   Plus, 
   BarChart3, 
-  Users, 
   Settings,
   Search,
   Filter
@@ -69,8 +67,8 @@ const Sidebar = ({ isOpen, onClose }) => {
           roles: ['admin']
         },
         {
-          name: 'Configuración',
-          href: '/admin/settings',
+          name: 'Administración',
+          href: '/admin',
           icon: Settings,
           roles: ['admin']
         },
@@ -99,13 +97,13 @@ const Sidebar = ({ isOpen, onClose }) => {
         className={`
           flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200
           ${isActive 
-            ? 'bg-primary-100 text-primary-700 border-r-2 border-primary-500' 
+            ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-700 border-r-2 border-purple-500' 
             : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           }
         `}
         aria-current={isActive ? 'page' : undefined}
       >
-        <item.icon className={`h-5 w-5 mr-3 ${isActive ? 'text-primary-600' : 'text-gray-400'}`} />
+        <item.icon className={`h-5 w-5 mr-3 ${isActive ? 'text-purple-600' : 'text-gray-400'}`} />
         {item.name}
       </NavLink>
     );
@@ -152,8 +150,8 @@ const Sidebar = ({ isOpen, onClose }) => {
         {/* User info (mobile only) */}
         <div className="lg:hidden border-t border-gray-200 p-4">
           <div className="flex items-center space-x-3" role="banner" aria-label="Información del usuario">
-            <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-              <span className="text-primary-600 font-medium text-sm">
+            <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+              <span className="text-purple-600 font-medium text-sm">
                 {user?.nombre_completo?.charAt(0) || user?.email?.charAt(0)}
               </span>
             </div>
@@ -161,7 +159,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               <p className="text-sm font-medium text-gray-900 truncate">
                 {user?.nombre_completo || user?.email}
               </p>
-              <p className="text-xs text-primary-600 capitalize">
+              <p className="text-xs text-purple-600 capitalize">
                 {user?.rol}
               </p>
             </div>
