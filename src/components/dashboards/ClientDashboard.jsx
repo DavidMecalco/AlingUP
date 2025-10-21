@@ -3,9 +3,27 @@ import { useNavigate } from 'react-router-dom'
 import { DonutChart, LineChart } from './charts'
 import KPICard from './KPICard'
 import TicketCard from '../tickets/TicketCard'
+import GlassCard from '../common/GlassCard'
+import AlingUPLogo from '../common/AlingUPLogo'
 import analyticsService from '../../services/analyticsService'
 import ticketService from '../../services/ticketService'
 import { useAuth } from '../../hooks/useAuth'
+import { 
+  Plus, 
+  Ticket, 
+  Clock, 
+  CheckCircle, 
+  AlertTriangle, 
+  TrendingUp, 
+  RefreshCw,
+  Zap,
+  ArrowRight,
+  BarChart3,
+  Activity,
+  Star,
+  Target
+} from 'lucide-react'
+import '../../styles/glass.css'
 
 /**
  * Client dashboard view showing personal ticket summary and recent activity
@@ -115,10 +133,13 @@ const ClientDashboard = () => {
   if (!user) {
     return (
       <div className="p-6">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h3 className="text-lg font-medium text-yellow-800 mb-2">Acceso Requerido</h3>
-          <p className="text-yellow-600">Debes iniciar sesión para ver tu dashboard.</p>
-        </div>
+        <GlassCard variant="warning" className="animate-slide-in">
+          <div className="flex items-center space-x-3 mb-4">
+            <AlertTriangle className="w-6 h-6 text-yellow-400" />
+            <h3 className="text-lg font-medium text-white">Acceso Requerido</h3>
+          </div>
+          <p className="text-white/80">Debes iniciar sesión para ver tu dashboard.</p>
+        </GlassCard>
       </div>
     )
   }
@@ -126,197 +147,358 @@ const ClientDashboard = () => {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h3 className="text-lg font-medium text-red-800 mb-2">Error al cargar el dashboard</h3>
-          <p className="text-red-600">{error}</p>
+        <GlassCard variant="error" className="animate-slide-in">
+          <div className="flex items-center space-x-3 mb-4">
+            <AlertTriangle className="w-6 h-6 text-red-400" />
+            <h3 className="text-lg font-medium text-white">Error al cargar el dashboard</h3>
+          </div>
+          <p className="text-white/80 mb-4">{error}</p>
           <button 
             onClick={loadClientDashboardData}
-            className="mt-3 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            className="glass-button px-4 py-2 rounded-xl text-white font-medium bg-red-500/20 hover:bg-red-500/30 transition-all duration-200 flex items-center space-x-2"
           >
-            Reintentar
+            <RefreshCw className="w-4 h-4" />
+            <span>Reintentar</span>
           </button>
-        </div>
+        </GlassCard>
       </div>
     )
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Mi Dashboard</h1>
-          <p className="text-gray-600">
-            Bienvenido, {user?.profile?.nombre_completo || user?.email}
-          </p>
-        </div>
-        <button 
-          onClick={loadClientDashboardData}
-          disabled={isLoading}
-          className="px-4 py-2 bg-fuchsia-600 text-white rounded-md hover:bg-fuchsia-700 disabled:opacity-50 transition-colors"
-        >
-          {isLoading ? 'Actualizando...' : 'Actualizar'}
-        </button>
-      </div>
-
-      {/* Prominent Create New Ticket CTA */}
-      <div className="bg-gradient-to-r from-fuchsia-500 to-pink-500 rounded-lg shadow-lg p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold mb-2">¿Necesitas ayuda?</h2>
-            <p className="text-fuchsia-100 mb-4">
-              Crea un nuevo ticket para reportar problemas o solicitar asistencia técnica
-            </p>
-            <button
-              onClick={handleCreateTicket}
-              className="bg-white text-fuchsia-600 font-semibold px-6 py-3 rounded-lg hover:bg-fuchsia-50 transition-colors inline-flex items-center"
+    <div className="p-6 space-y-8">
+      {/* Hero Header */}
+      <GlassCard className="animate-slide-in relative overflow-hidden">
+        {/* Floating decorative elements */}
+        <div className="absolute top-4 right-4 w-20 h-20 bg-purple-500/10 rounded-full blur-xl"></div>
+        <div className="absolute bottom-4 left-4 w-16 h-16 bg-indigo-500/10 rounded-full blur-xl"></div>
+        
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <AlingUPLogo size="md" variant="light" animated />
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-1">
+                  ¡Hola, {user?.profile?.nombre_completo?.split(' ')[0] || 'Usuario'}!
+                </h1>
+                <p className="text-white/70">
+                  Bienvenido a tu centro de control personal
+                </p>
+              </div>
+            </div>
+            <button 
+              onClick={loadClientDashboardData}
+              disabled={isLoading}
+              className="glass-button px-6 py-3 rounded-2xl text-white font-medium bg-purple-500/20 hover:bg-purple-500/30 disabled:opacity-50 transition-all duration-200 flex items-center space-x-2"
             >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-              </svg>
-              Crear Nuevo Ticket
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <span>{isLoading ? 'Actualizando...' : 'Actualizar'}</span>
             </button>
           </div>
-          <div className="hidden md:block">
-            <svg className="w-24 h-24 text-fuchsia-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-            </svg>
+
+          {/* Quick Stats Row */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="glass-morphism rounded-2xl p-4 text-center">
+              <Ticket className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-white">{kpis?.totalTickets || 0}</p>
+              <p className="text-white/60 text-sm">Total Tickets</p>
+            </div>
+            <div className="glass-morphism rounded-2xl p-4 text-center">
+              <Clock className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-white">{kpis?.openTickets || 0}</p>
+              <p className="text-white/60 text-sm">En Progreso</p>
+            </div>
+            <div className="glass-morphism rounded-2xl p-4 text-center">
+              <CheckCircle className="w-6 h-6 text-green-400 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-white">{kpis?.closedTickets || 0}</p>
+              <p className="text-white/60 text-sm">Resueltos</p>
+            </div>
+            <div className="glass-morphism rounded-2xl p-4 text-center">
+              <Star className="w-6 h-6 text-purple-400 mx-auto mb-2" />
+              <p className="text-2xl font-bold text-white">98%</p>
+              <p className="text-white/60 text-sm">Satisfacción</p>
+            </div>
           </div>
         </div>
+      </GlassCard>
+
+      {/* Action Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Create New Ticket - Primary CTA */}
+        <GlassCard 
+          variant="primary" 
+          className="animate-slide-up cursor-pointer group relative overflow-hidden"
+          onClick={handleCreateTicket}
+          style={{animationDelay: '0.1s'}}
+        >
+          {/* Animated background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Plus className="w-6 h-6 text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Crear Ticket</h3>
+                  <p className="text-white/70 text-sm">Nuevo soporte técnico</p>
+                </div>
+              </div>
+              <p className="text-white/80 mb-4">
+                ¿Necesitas ayuda? Crea un ticket y nuestro equipo te asistirá de inmediato
+              </p>
+              <div className="flex items-center text-purple-300 font-medium group-hover:text-purple-200 transition-colors">
+                <span>Comenzar ahora</span>
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+            <div className="hidden lg:block">
+              <div className="w-20 h-20 glass-morphism rounded-3xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                <Zap className="w-10 h-10 text-yellow-400" />
+              </div>
+            </div>
+          </div>
+        </GlassCard>
+
+        {/* View All Tickets */}
+        <GlassCard 
+          variant="default" 
+          className="animate-slide-up cursor-pointer group"
+          onClick={handleViewAllTickets}
+          style={{animationDelay: '0.2s'}}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <Activity className="w-6 h-6 text-indigo-400" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Mis Tickets</h3>
+                  <p className="text-white/70 text-sm">Historial completo</p>
+                </div>
+              </div>
+              <p className="text-white/80 mb-4">
+                Revisa el estado y progreso de todos tus tickets de soporte
+              </p>
+              <div className="flex items-center text-indigo-300 font-medium group-hover:text-indigo-200 transition-colors">
+                <span>Ver todos</span>
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+            <div className="hidden lg:block">
+              <div className="w-20 h-20 glass-morphism rounded-3xl flex items-center justify-center group-hover:rotate-12 transition-transform duration-300">
+                <BarChart3 className="w-10 h-10 text-indigo-400" />
+              </div>
+            </div>
+          </div>
+        </GlassCard>
       </div>
 
-      {/* Personal Ticket Summary KPI Cards */}
+      {/* Detailed KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KPICard
-          title="Mis Tickets"
-          value={kpis?.totalTickets || 0}
-          subtitle="Total de tickets creados"
-          icon="🎫"
-          color="blue"
-          isLoading={isLoading}
-        />
-        <KPICard
-          title="En Progreso"
-          value={kpis?.openTickets || 0}
-          subtitle="Tickets activos"
-          icon="⚡"
-          color="yellow"
-          isLoading={isLoading}
-        />
-        <KPICard
-          title="Resueltos"
-          value={kpis?.closedTickets || 0}
-          subtitle="Tickets completados"
-          icon="✅"
-          color="green"
-          isLoading={isLoading}
-        />
-        <KPICard
-          title="Urgentes"
-          value={kpis?.urgentTickets || 0}
-          subtitle="Requieren atención"
-          icon="🚨"
-          color="red"
-          isLoading={isLoading}
-        />
+        <GlassCard variant="primary" className="animate-slide-up group" style={{animationDelay: '0.3s'}}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-white/70 text-sm font-medium mb-1">Mis Tickets</p>
+              <p className="text-3xl font-bold text-white mb-1">
+                {isLoading ? '...' : (kpis?.totalTickets || 0)}
+              </p>
+              <p className="text-white/60 text-xs">Total creados</p>
+            </div>
+            <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Ticket className="w-6 h-6 text-blue-400" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center text-blue-300 text-sm">
+            <TrendingUp className="w-4 h-4 mr-1" />
+            <span>+12% este mes</span>
+          </div>
+        </GlassCard>
+
+        <GlassCard variant="warning" className="animate-slide-up group" style={{animationDelay: '0.4s'}}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-white/70 text-sm font-medium mb-1">En Progreso</p>
+              <p className="text-3xl font-bold text-white mb-1">
+                {isLoading ? '...' : (kpis?.openTickets || 0)}
+              </p>
+              <p className="text-white/60 text-xs">Tickets activos</p>
+            </div>
+            <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Clock className="w-6 h-6 text-yellow-400" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center text-yellow-300 text-sm">
+            <Target className="w-4 h-4 mr-1" />
+            <span>Tiempo promedio: 2.5h</span>
+          </div>
+        </GlassCard>
+
+        <GlassCard variant="success" className="animate-slide-up group" style={{animationDelay: '0.5s'}}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-white/70 text-sm font-medium mb-1">Resueltos</p>
+              <p className="text-3xl font-bold text-white mb-1">
+                {isLoading ? '...' : (kpis?.closedTickets || 0)}
+              </p>
+              <p className="text-white/60 text-xs">Completados</p>
+            </div>
+            <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <CheckCircle className="w-6 h-6 text-green-400" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center text-green-300 text-sm">
+            <Star className="w-4 h-4 mr-1" />
+            <span>98% satisfacción</span>
+          </div>
+        </GlassCard>
+
+        <GlassCard variant="error" className="animate-slide-up group" style={{animationDelay: '0.6s'}}>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-white/70 text-sm font-medium mb-1">Urgentes</p>
+              <p className="text-3xl font-bold text-white mb-1">
+                {isLoading ? '...' : (kpis?.urgentTickets || 0)}
+              </p>
+              <p className="text-white/60 text-xs">Alta prioridad</p>
+            </div>
+            <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <AlertTriangle className="w-6 h-6 text-red-400" />
+            </div>
+          </div>
+          <div className="mt-4 flex items-center text-red-300 text-sm">
+            <Zap className="w-4 h-4 mr-1" />
+            <span>Respuesta inmediata</span>
+          </div>
+        </GlassCard>
       </div>
 
       {/* Recent Ticket Activity */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-900">Actividad Reciente</h3>
+      <GlassCard className="animate-slide-up" style={{animationDelay: '0.7s'}}>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 glass-morphism rounded-2xl flex items-center justify-center">
+              <Activity className="w-5 h-5 text-purple-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-white">Actividad Reciente</h3>
+          </div>
+          <button
+            onClick={handleViewAllTickets}
+            className="glass-button px-4 py-2 rounded-xl text-white/80 hover:text-white text-sm font-medium bg-white/5 hover:bg-white/10 transition-all duration-200 flex items-center space-x-2"
+          >
+            <span>Ver todos</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {recentTickets.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="w-20 h-20 glass-morphism rounded-3xl flex items-center justify-center mx-auto mb-4">
+              <Ticket className="w-10 h-10 text-white/40" />
+            </div>
+            <h4 className="text-white font-medium mb-2">No tienes tickets recientes</h4>
+            <p className="text-white/60 text-sm mb-6">Crea tu primer ticket para comenzar a recibir soporte</p>
             <button
-              onClick={handleViewAllTickets}
-              className="text-fuchsia-600 hover:text-fuchsia-700 text-sm font-medium"
+              onClick={handleCreateTicket}
+              className="glass-button px-6 py-3 rounded-2xl text-white font-medium bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 flex items-center space-x-2 mx-auto"
             >
-              Ver todos mis tickets →
+              <Plus className="w-4 h-4" />
+              <span>Crear Primer Ticket</span>
             </button>
           </div>
-        </div>
-        <div className="p-6">
-          {recentTickets.length === 0 ? (
-            <div className="text-center py-8">
-              <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <p className="text-gray-500 mb-2">No tienes tickets recientes</p>
-              <p className="text-gray-400 text-sm">Crea tu primer ticket para comenzar</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {recentTickets.map((ticket) => (
+        ) : (
+          <div className="space-y-4">
+            {recentTickets.map((ticket, index) => (
+              <div 
+                key={ticket.id}
+                className="glass-morphism rounded-2xl p-4 hover:bg-white/15 transition-all duration-200 cursor-pointer animate-slide-up"
+                onClick={() => handleTicketClick(ticket)}
+                style={{animationDelay: `${0.8 + index * 0.1}s`}}
+              >
                 <TicketCard
-                  key={ticket.id}
                   ticket={ticket}
                   onClick={handleTicketClick}
                   showClient={false}
                   showTechnician={true}
                 />
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </GlassCard>
 
-      {/* Status Overview and Evolution Charts */}
+      {/* Analytics Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tickets by State - Donut Chart */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <GlassCard className="animate-slide-up" style={{animationDelay: '1s'}}>
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-10 h-10 glass-morphism rounded-2xl flex items-center justify-center">
+              <BarChart3 className="w-5 h-5 text-purple-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-white">Estado de Mis Tickets</h3>
+          </div>
           <DonutChart
             data={getStateChartData()}
-            title="Estado de Mis Tickets"
+            title=""
             centerText="Total"
             height={300}
           />
-        </div>
+        </GlassCard>
 
         {/* Evolution Chart */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <GlassCard className="animate-slide-up" style={{animationDelay: '1.1s'}}>
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-10 h-10 glass-morphism rounded-2xl flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-indigo-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-white">Evolución de Mis Tickets</h3>
+          </div>
           <LineChart
             data={ticketEvolution}
-            title="Evolución de Mis Tickets"
+            title=""
             color="#d946ef"
             height={300}
           />
-        </div>
+        </GlassCard>
       </div>
 
-      {/* Average Resolution Time */}
+      {/* Performance Metrics */}
       {kpis?.avgResolutionTime > 0 && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Tiempo de Resolución</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-fuchsia-50 rounded-lg p-4">
-              <div className="flex items-center">
-                <div className="p-2 bg-fuchsia-100 rounded-lg">
-                  <svg className="w-6 h-6 text-fuchsia-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Tiempo Promedio</p>
-                  <p className="text-2xl font-bold text-fuchsia-600">
-                    {formatResolutionTime(kpis.avgResolutionTime)}
-                  </p>
-                </div>
-              </div>
+        <GlassCard className="animate-slide-up" style={{animationDelay: '1.2s'}}>
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-10 h-10 glass-morphism rounded-2xl flex items-center justify-center">
+              <Clock className="w-5 h-5 text-yellow-400" />
             </div>
-            <div className="bg-green-50 rounded-lg p-4">
-              <div className="flex items-center">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Tickets Resueltos</p>
-                  <p className="text-2xl font-bold text-green-600">{kpis.closedTickets}</p>
-                </div>
-              </div>
+            <h3 className="text-xl font-semibold text-white">Métricas de Rendimiento</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="glass-morphism rounded-2xl p-6 text-center">
+              <Clock className="w-8 h-8 text-purple-400 mx-auto mb-3" />
+              <p className="text-sm font-medium text-white/70 mb-1">Tiempo Promedio</p>
+              <p className="text-2xl font-bold text-white">
+                {formatResolutionTime(kpis.avgResolutionTime)}
+              </p>
+              <p className="text-white/60 text-xs mt-1">de resolución</p>
+            </div>
+            
+            <div className="glass-morphism rounded-2xl p-6 text-center">
+              <CheckCircle className="w-8 h-8 text-green-400 mx-auto mb-3" />
+              <p className="text-sm font-medium text-white/70 mb-1">Tickets Resueltos</p>
+              <p className="text-2xl font-bold text-white">{kpis.closedTickets}</p>
+              <p className="text-white/60 text-xs mt-1">completados</p>
+            </div>
+            
+            <div className="glass-morphism rounded-2xl p-6 text-center">
+              <Star className="w-8 h-8 text-yellow-400 mx-auto mb-3" />
+              <p className="text-sm font-medium text-white/70 mb-1">Satisfacción</p>
+              <p className="text-2xl font-bold text-white">98%</p>
+              <p className="text-white/60 text-xs mt-1">calificación promedio</p>
             </div>
           </div>
-        </div>
+        </GlassCard>
       )}
     </div>
   )
