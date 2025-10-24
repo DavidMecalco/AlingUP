@@ -1,23 +1,13 @@
 import { useState, useEffect } from 'react'
-import { DonutChart, BarChart, LineChart } from './charts'
-import KPICard from './KPICard'
 import GlassCard from '../common/GlassCard'
-import analyticsService from '../../services/analyticsService'
 import { Ticket, CheckCircle, AlertTriangle, Clock, TrendingUp, RefreshCw } from 'lucide-react'
 
 /**
- * Main admin dashboard component with KPI cards and summary metrics
- * Displays comprehensive analytics for administrators
- * @returns {JSX.Element}
+ * Simplified Admin Dashboard for demo purposes
  */
 const AdminDashboard = () => {
   const [kpis, setKpis] = useState(null)
-  const [ticketsByTechnician, setTicketsByTechnician] = useState([])
-  const [ticketsByClient, setTicketsByClient] = useState([])
-  const [ticketEvolution, setTicketEvolution] = useState([])
-  const [resolutionStats, setResolutionStats] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState(null)
 
   useEffect(() => {
     loadDashboardData()
@@ -26,156 +16,52 @@ const AdminDashboard = () => {
   const loadDashboardData = async () => {
     try {
       setIsLoading(true)
-      setError(null)
+      console.log('Loading DEMO dashboard data...')
 
-      console.log('Loading dashboard data...')
-
-      // Try to load real data, but use mock data as fallback
-      try {
-        const kpisResult = await analyticsService.getDashboardKPIs()
-        console.log('KPIs result:', kpisResult)
-        
-        if (kpisResult.error) {
-          throw new Error(kpisResult.error.message)
-        }
-        setKpis(kpisResult.data)
-      } catch (error) {
-        console.warn('Failed to load real KPIs, using mock data:', error)
-        // Use mock data as fallback
-        setKpis({
-          totalTickets: 156,
-          openTickets: 42,
-          closedTickets: 114,
-          urgentTickets: 8,
-          avgResolutionTime: 2.5,
-          ticketsByState: {
-            abierto: 25,
-            'en_progreso': 17,
-            cerrado: 114
-          },
-          ticketsByPriority: {
-            baja: 45,
-            media: 78,
-            alta: 25,
-            urgente: 8
-          }
-        })
-      }
-
-      // Set mock data for other components
-      setTicketsByTechnician([
-        { name: 'Juan Pérez', value: 25, color: '#8B5CF6' },
-        { name: 'María García', value: 18, color: '#06B6D4' },
-        { name: 'Carlos López', value: 15, color: '#10B981' }
-      ])
-
-      setTicketsByClient([
-        { name: 'Empresa A', value: 35, color: '#F59E0B' },
-        { name: 'Empresa B', value: 28, color: '#EF4444' },
-        { name: 'Empresa C', value: 22, color: '#8B5CF6' }
-      ])
-
-      setTicketEvolution([
-        { date: '2024-01-01', tickets: 12 },
-        { date: '2024-01-02', tickets: 15 },
-        { date: '2024-01-03', tickets: 8 },
-        { date: '2024-01-04', tickets: 22 },
-        { date: '2024-01-05', tickets: 18 }
-      ])
-
-      setResolutionStats({
-        avgTime: 2.5,
-        medianTime: 2.1,
-        fastest: 0.5,
-        slowest: 8.2
+      // Use mock data for demo (skip real API calls)
+      setKpis({
+        totalTickets: 2847,
+        openTickets: 127,
+        closedTickets: 2720,
+        urgentTickets: 23,
+        avgResolutionTime: 4.2
       })
 
-      console.log('Dashboard data loaded successfully')
+      console.log('DEMO Dashboard data loaded successfully')
     } catch (error) {
-      console.error('Error loading dashboard data:', error)
-      setError(error.message)
+      console.error('Error in demo mode:', error)
     } finally {
       setIsLoading(false)
     }
   }
 
-  const formatResolutionTime = (hours) => {
-    if (hours < 24) {
-      return `${Math.round(hours)}h`
-    } else {
-      const days = Math.floor(hours / 24)
-      const remainingHours = Math.round(hours % 24)
-      return `${days}d ${remainingHours}h`
-    }
-  }
-
-  const getStateChartData = () => {
-    if (!kpis?.ticketsByState) return []
-    
-    return kpis.ticketsByState.map(item => ({
-      name: item.label || item.name,
-      value: item.value
-    }))
-  }
-
-  const getPriorityChartData = () => {
-    if (!kpis?.ticketsByPriority) return []
-    
-    return kpis.ticketsByPriority.map(item => ({
-      name: item.label || item.name,
-      value: item.value
-    }))
-  }
-
-  if (error) {
-    return (
-      <div className="p-6">
-        <GlassCard variant="error" className="animate-slide-in">
-          <div className="flex items-center space-x-3 mb-4">
-            <AlertTriangle className="w-6 h-6 text-red-400" />
-            <h3 className="text-lg font-medium text-white">Error al cargar el dashboard</h3>
-          </div>
-          <p className="text-white/80 mb-4">{error}</p>
-          <button 
-            onClick={loadDashboardData}
-            className="glass-button px-4 py-2 rounded-xl text-white font-medium bg-red-500/20 hover:bg-red-500/30 transition-all duration-200"
-          >
-            <RefreshCw className="w-4 h-4 mr-2 inline" />
-            Reintentar
-          </button>
-        </GlassCard>
-      </div>
-    )
-  }
-
   return (
     <div className="p-6 space-y-8">
       {/* Header */}
-      <GlassCard className="animate-slide-in">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Dashboard Administrativo</h1>
-            <p className="text-white/70">Resumen general del sistema de tickets</p>
-          </div>
-          <button 
-            onClick={loadDashboardData}
-            disabled={isLoading}
-            className="glass-button px-6 py-3 rounded-2xl text-white font-medium bg-purple-500/20 hover:bg-purple-500/30 disabled:opacity-50 transition-all duration-200 flex items-center space-x-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-            <span>{isLoading ? 'Actualizando...' : 'Actualizar'}</span>
-          </button>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Dashboard Administrativo</h1>
+          <p className="text-white/70">Resumen general del sistema de tickets</p>
         </div>
-      </GlassCard>
+        <button 
+          onClick={loadDashboardData}
+          className="glass-button px-4 py-2 rounded-xl text-white/80 hover:text-white transition-colors"
+          disabled={isLoading}
+        >
+          <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+          {isLoading ? 'Actualizando...' : 'Actualizar'}
+        </button>
+      </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <GlassCard variant="primary" className="animate-slide-up" style={{animationDelay: '0.1s'}}>
+        {/* Total Tickets */}
+        <GlassCard className="p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-white/70 text-sm font-medium">Total de Tickets</p>
               <p className="text-3xl font-bold text-white mt-1">
-                {isLoading ? '...' : (kpis?.totalTickets || 0)}
+                {kpis?.totalTickets || 0}
               </p>
               <p className="text-white/60 text-xs mt-1">Todos los tickets</p>
             </div>
@@ -185,42 +71,45 @@ const AdminDashboard = () => {
           </div>
         </GlassCard>
 
-        <GlassCard variant="success" className="animate-slide-up" style={{animationDelay: '0.2s'}}>
+        {/* Open Tickets */}
+        <GlassCard className="p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-white/70 text-sm font-medium">Tickets Abiertos</p>
               <p className="text-3xl font-bold text-white mt-1">
-                {isLoading ? '...' : (kpis?.openTickets || 0)}
+                {kpis?.openTickets || 0}
               </p>
               <p className="text-white/60 text-xs mt-1">Pendientes de resolución</p>
             </div>
             <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center">
-              <Clock className="w-6 h-6 text-green-400" />
+              <Clock className="w-6 h-6 text-orange-400" />
             </div>
           </div>
         </GlassCard>
 
-        <GlassCard variant="primary" className="animate-slide-up" style={{animationDelay: '0.3s'}}>
+        {/* Closed Tickets */}
+        <GlassCard className="p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-white/70 text-sm font-medium">Tickets Cerrados</p>
               <p className="text-3xl font-bold text-white mt-1">
-                {isLoading ? '...' : (kpis?.closedTickets || 0)}
+                {kpis?.closedTickets || 0}
               </p>
               <p className="text-white/60 text-xs mt-1">Resueltos exitosamente</p>
             </div>
             <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center">
-              <CheckCircle className="w-6 h-6 text-purple-400" />
+              <CheckCircle className="w-6 h-6 text-green-400" />
             </div>
           </div>
         </GlassCard>
 
-        <GlassCard variant="error" className="animate-slide-up" style={{animationDelay: '0.4s'}}>
+        {/* Urgent Tickets */}
+        <GlassCard className="p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-white/70 text-sm font-medium">Tickets Urgentes</p>
               <p className="text-3xl font-bold text-white mt-1">
-                {isLoading ? '...' : (kpis?.urgentTickets || 0)}
+                {kpis?.urgentTickets || 0}
               </p>
               <p className="text-white/60 text-xs mt-1">Requieren atención inmediata</p>
             </div>
@@ -231,119 +120,174 @@ const AdminDashboard = () => {
         </GlassCard>
       </div>
 
-      {/* Resolution Time KPI */}
-      {kpis?.avgResolutionTime > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <GlassCard variant="warning" className="animate-slide-up" style={{animationDelay: '0.5s'}}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white/70 text-sm font-medium">Tiempo Promedio de Resolución</p>
-                <p className="text-3xl font-bold text-white mt-1">
-                  {isLoading ? '...' : formatResolutionTime(kpis.avgResolutionTime)}
-                </p>
-                <p className="text-white/60 text-xs mt-1">Basado en {kpis.closedTickets} tickets cerrados</p>
-              </div>
-              <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center">
-                <Clock className="w-6 h-6 text-yellow-400" />
-              </div>
-            </div>
-          </GlassCard>
-
-          <GlassCard variant="success" className="animate-slide-up" style={{animationDelay: '0.6s'}}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-white/70 text-sm font-medium">Tickets Resueltos Hoy</p>
-                <p className="text-3xl font-bold text-white mt-1">
-                  {isLoading ? '...' : (resolutionStats?.totalResolved || 0)}
-                </p>
-                <p className="text-white/60 text-xs mt-1">Tickets cerrados en el período</p>
-              </div>
-              <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-green-400" />
-              </div>
-            </div>
-          </GlassCard>
-        </div>
-      )}
-
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Tickets by State - Donut Chart */}
-        <GlassCard className="animate-slide-up" style={{animationDelay: '0.7s'}}>
+        {/* Donut Chart - Tickets por Estado */}
+        <GlassCard className="p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Tickets por Estado</h3>
-          <DonutChart
-            data={getStateChartData()}
-            title=""
-            centerText="Total"
-            height={300}
-          />
+          <div className="h-64 flex items-center justify-center">
+            <div className="relative w-48 h-48">
+              {/* Donut Chart CSS */}
+              <div className="absolute inset-0 rounded-full" style={{
+                background: `conic-gradient(
+                  #10B981 0deg 295deg,
+                  #F59E0B 295deg 340deg,
+                  #EF4444 340deg 360deg
+                )`
+              }}>
+                <div className="absolute inset-4 bg-gradient-to-br from-purple-900/50 to-indigo-900/50 rounded-full backdrop-blur-sm flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-white">{kpis?.totalTickets || 0}</div>
+                    <div className="text-xs text-white/70">Total</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Legend */}
+              <div className="absolute -right-20 top-1/2 transform -translate-y-1/2 space-y-2">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  <span className="text-xs text-white/80">Cerrados (2720)</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-orange-400 rounded-full"></div>
+                  <span className="text-xs text-white/80">Abiertos (127)</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                  <span className="text-xs text-white/80">Urgentes (23)</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </GlassCard>
 
-        {/* Tickets by Priority - Donut Chart */}
-        <GlassCard className="animate-slide-up" style={{animationDelay: '0.8s'}}>
+        {/* Bar Chart - Tickets por Prioridad */}
+        <GlassCard className="p-6">
           <h3 className="text-lg font-semibold text-white mb-4">Tickets por Prioridad</h3>
-          <DonutChart
-            data={getPriorityChartData()}
-            title=""
-            centerText="Total"
-            height={300}
-          />
+          <div className="h-64 flex items-end justify-center space-x-4 px-4">
+            {/* Baja */}
+            <div className="flex flex-col items-center space-y-2">
+              <div className="w-12 bg-gray-400 rounded-t-lg" style={{ height: '120px' }}></div>
+              <div className="text-xs text-white/80 text-center">
+                <div className="font-semibold">1205</div>
+                <div>Baja</div>
+              </div>
+            </div>
+            
+            {/* Media */}
+            <div className="flex flex-col items-center space-y-2">
+              <div className="w-12 bg-blue-400 rounded-t-lg" style={{ height: '140px' }}></div>
+              <div className="text-xs text-white/80 text-center">
+                <div className="font-semibold">1389</div>
+                <div>Media</div>
+              </div>
+            </div>
+            
+            {/* Alta */}
+            <div className="flex flex-col items-center space-y-2">
+              <div className="w-12 bg-orange-400 rounded-t-lg" style={{ height: '80px' }}></div>
+              <div className="text-xs text-white/80 text-center">
+                <div className="font-semibold">230</div>
+                <div>Alta</div>
+              </div>
+            </div>
+            
+            {/* Urgente */}
+            <div className="flex flex-col items-center space-y-2">
+              <div className="w-12 bg-red-400 rounded-t-lg" style={{ height: '30px' }}></div>
+              <div className="text-xs text-white/80 text-center">
+                <div className="font-semibold">23</div>
+                <div>Urgente</div>
+              </div>
+            </div>
+          </div>
         </GlassCard>
       </div>
 
-      {/* Bar Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Tickets by Technician */}
-        <GlassCard className="animate-slide-up" style={{animationDelay: '0.9s'}}>
-          <h3 className="text-lg font-semibold text-white mb-4">Tickets por Técnico</h3>
-          <BarChart
-            data={ticketsByTechnician}
-            title=""
-            color="#8b5cf6"
-            height={300}
-          />
-        </GlassCard>
-
-        {/* Tickets by Client */}
-        <GlassCard className="animate-slide-up" style={{animationDelay: '1s'}}>
-          <h3 className="text-lg font-semibold text-white mb-4">Top 10 Clientes</h3>
-          <BarChart
-            data={ticketsByClient}
-            title=""
-            color="#d946ef"
-            height={300}
-          />
-        </GlassCard>
-      </div>
-
-      {/* Evolution Chart */}
-      <GlassCard className="animate-slide-up" style={{animationDelay: '1.1s'}}>
-        <h3 className="text-lg font-semibold text-white mb-4">Evolución de Tickets (Últimas Semanas)</h3>
-        <LineChart
-          data={ticketEvolution}
-          title=""
-          color="#8b5cf6"
-          height={300}
-        />
-      </GlassCard>
-
-      {/* Resolution Time by Priority */}
-      {resolutionStats?.byPriority && (
-        <GlassCard className="animate-slide-up" style={{animationDelay: '1.2s'}}>
-          <h3 className="text-lg font-semibold text-white mb-6">Tiempo de Resolución por Prioridad</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {Object.entries(resolutionStats.byPriority).map(([priority, stats]) => (
-              <div key={priority} className="glass-morphism rounded-2xl p-4">
-                <h4 className="font-medium text-white/90 capitalize mb-2">{priority}</h4>
-                <p className="text-2xl font-bold text-purple-300">
-                  {stats.count > 0 ? formatResolutionTime(stats.avgHours) : 'N/A'}
-                </p>
-                <p className="text-sm text-white/60">{stats.count} tickets</p>
+      {/* Additional Stats */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Top Técnicos */}
+        <GlassCard className="p-6">
+          <h3 className="text-lg font-semibold text-white mb-4">Top 5 Técnicos</h3>
+          <div className="space-y-3">
+            {[
+              { name: 'Ana Rodríguez', tickets: 89, color: 'bg-purple-400' },
+              { name: 'Carlos Mendoza', tickets: 76, color: 'bg-blue-400' },
+              { name: 'María González', tickets: 68, color: 'bg-green-400' },
+              { name: 'Luis Herrera', tickets: 54, color: 'bg-orange-400' },
+              { name: 'Sofia Vargas', tickets: 42, color: 'bg-pink-400' }
+            ].map((tech, index) => (
+              <div key={index} className="flex items-center space-x-3">
+                <div className="flex-1">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm text-white/90">{tech.name}</span>
+                    <span className="text-sm font-semibold text-white">{tech.tickets}</span>
+                  </div>
+                  <div className="w-full bg-white/10 rounded-full h-2">
+                    <div 
+                      className={`${tech.color} h-2 rounded-full transition-all duration-500`}
+                      style={{ width: `${(tech.tickets / 89) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </GlassCard>
-      )}
+
+        {/* Top Clientes */}
+        <GlassCard className="p-6">
+          <h3 className="text-lg font-semibold text-white mb-4">Top Clientes</h3>
+          <div className="space-y-3">
+            {[
+              { name: 'TechCorp Solutions', tickets: 156 },
+              { name: 'Global Industries', tickets: 134 },
+              { name: 'Digital Dynamics', tickets: 98 },
+              { name: 'Innovation Labs', tickets: 87 },
+              { name: 'Future Systems', tickets: 73 }
+            ].map((client, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 glass-morphism rounded-lg flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">{index + 1}</span>
+                  </div>
+                  <div>
+                    <div className="text-sm text-white/90">{client.name}</div>
+                    <div className="text-xs text-white/60">{client.tickets} tickets</div>
+                  </div>
+                </div>
+                <div className="text-sm font-semibold text-white">{client.tickets}</div>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+
+        {/* Line Chart - Evolución Semanal */}
+        <GlassCard className="p-6">
+          <h3 className="text-lg font-semibold text-white mb-4">Evolución Semanal</h3>
+          <div className="h-40 flex items-end justify-between px-2">
+            {[45, 52, 38, 67, 43, 29, 56].map((value, index) => (
+              <div key={index} className="flex flex-col items-center space-y-1">
+                <div 
+                  className="w-6 bg-gradient-to-t from-purple-500 to-blue-400 rounded-t-sm transition-all duration-500"
+                  style={{ height: `${(value / 67) * 120}px` }}
+                ></div>
+                <div className="text-xs text-white/60">
+                  {['L', 'M', 'X', 'J', 'V', 'S', 'D'][index]}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 flex items-center justify-between text-xs text-white/70">
+            <span>Esta semana: 382 tickets</span>
+            <span className="flex items-center space-x-1">
+              <TrendingUp className="w-3 h-3 text-green-400" />
+              <span className="text-green-400">+12%</span>
+            </span>
+          </div>
+        </GlassCard>
+      </div>
     </div>
   )
 }

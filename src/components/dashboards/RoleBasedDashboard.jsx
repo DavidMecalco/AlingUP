@@ -11,10 +11,13 @@ import AdminDashboard from './AdminDashboard'
 const RoleBasedDashboard = () => {
   const { user, isLoading } = useAuth()
 
+  // For demo purposes, skip loading states and user checks
+  console.log('RoleBasedDashboard - Demo mode active')
+  
+  /* Original loading and user checks (commented for demo):
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-        {/* Animated Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
           <div className="absolute top-20 left-20 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-float"></div>
           <div className="absolute bottom-20 right-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
@@ -34,7 +37,6 @@ const RoleBasedDashboard = () => {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-        {/* Animated Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
           <div className="absolute top-20 left-20 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-float"></div>
           <div className="absolute bottom-20 right-20 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
@@ -49,8 +51,14 @@ const RoleBasedDashboard = () => {
       </div>
     )
   }
+  */
 
   const renderDashboardByRole = () => {
+    // For demo purposes, always show AdminDashboard with mock data
+    console.log('Rendering DEMO AdminDashboard')
+    return <AdminDashboard />
+    
+    /* Original role-based logic (commented for demo):
     const userRole = user?.profile?.rol || user?.rol
 
     switch (userRole) {
@@ -80,6 +88,7 @@ const RoleBasedDashboard = () => {
           </div>
         )
     }
+    */
   }
 
   return (

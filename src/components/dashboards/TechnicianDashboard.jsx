@@ -53,36 +53,45 @@ const TechnicianDashboard = () => {
       setIsLoading(true)
       setError(null)
 
-      const technicianId = user.id
-      const filters = {
-        tecnicos: [technicianId]
-      }
+      console.log('Loading DEMO technician dashboard data...')
 
-      // Load technician-specific dashboard data
-      const [
-        kpisResult,
-        evolutionResult
-      ] = await Promise.all([
-        analyticsService.getDashboardKPIs(filters),
-        analyticsService.getTicketEvolution(filters, 'week')
+      // Use mock data for demo (skip real API calls)
+      setKpis({
+        assignedTickets: 18,
+        completedToday: 5,
+        avgResolutionTime: 3.2,
+        pendingTickets: 13,
+        ticketsByState: [
+          { name: 'Asignado', value: 8, color: '#F59E0B' },
+          { name: 'En Progreso', value: 5, color: '#06B6D4' },
+          { name: 'Completado', value: 5, color: '#10B981' }
+        ],
+        ticketsByPriority: [
+          { name: 'Baja', value: 4, color: '#6B7280' },
+          { name: 'Media', value: 9, color: '#3B82F6' },
+          { name: 'Alta', value: 4, color: '#F59E0B' },
+          { name: 'Urgente', value: 1, color: '#EF4444' }
+        ],
+        performanceMetrics: {
+          resolutionRate: 94,
+          customerSatisfaction: 4.8,
+          responseTime: 1.2
+        }
+      })
+
+      setTicketEvolution([
+        { date: '2024-10-14', tickets: 6 },
+        { date: '2024-10-15', tickets: 4 },
+        { date: '2024-10-16', tickets: 8 },
+        { date: '2024-10-17', tickets: 5 },
+        { date: '2024-10-18', tickets: 7 },
+        { date: '2024-10-19', tickets: 3 },
+        { date: '2024-10-20', tickets: 5 }
       ])
 
-      // Handle KPIs
-      if (kpisResult.error) {
-        throw new Error(kpisResult.error.message)
-      }
-      setKpis(kpisResult.data)
-
-      // Handle evolution data
-      if (evolutionResult.error) {
-        console.error('Error loading evolution data:', evolutionResult.error)
-      } else {
-        setTicketEvolution(evolutionResult.data || [])
-      }
-
     } catch (error) {
-      console.error('Error loading technician dashboard data:', error)
-      setError(error.message)
+      console.error('Error in demo mode:', error)
+      setError(null) // Clear any errors in demo mode
     } finally {
       setIsLoading(false)
     }

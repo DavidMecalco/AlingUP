@@ -50,50 +50,71 @@ const ClientDashboard = () => {
       setIsLoading(true)
       setError(null)
 
-      const clientId = user.id
-      const filters = {
-        clientes: [clientId]
-      }
+      console.log('Loading DEMO client dashboard data...')
 
-      // Load client-specific dashboard data
-      const [
-        kpisResult,
-        recentTicketsResult,
-        evolutionResult
-      ] = await Promise.all([
-        analyticsService.getDashboardKPIs(filters),
-        ticketService.getTicketsByClient(clientId, { 
-          ...filters, 
-          limit: 5,
-          sortBy: 'created_at',
-          sortOrder: 'desc'
-        }),
-        analyticsService.getTicketEvolution(filters, 'week')
+      // Use mock data for demo (skip real API calls)
+      setKpis({
+        totalTickets: 24,
+        openTickets: 7,
+        closedTickets: 17,
+        urgentTickets: 2,
+        avgResolutionTime: 3.8,
+        ticketsByState: [
+          { name: 'Abierto', value: 5, color: '#F59E0B' },
+          { name: 'En Progreso', value: 2, color: '#06B6D4' },
+          { name: 'Cerrado', value: 17, color: '#10B981' }
+        ],
+        ticketsByPriority: [
+          { name: 'Baja', value: 8, color: '#6B7280' },
+          { name: 'Media', value: 12, color: '#3B82F6' },
+          { name: 'Alta', value: 2, color: '#F59E0B' },
+          { name: 'Urgente', value: 2, color: '#EF4444' }
+        ]
+      })
+
+      setRecentTickets([
+        {
+          id: 'demo-1',
+          ticket_number: 'TK-2024-001',
+          titulo: 'Problema con acceso al sistema',
+          estado: 'en_progreso',
+          prioridad: 'alta',
+          created_at: '2024-10-20T10:30:00Z',
+          tipo_ticket: { nombre: 'Soporte Técnico', color: '#3B82F6' }
+        },
+        {
+          id: 'demo-2',
+          ticket_number: 'TK-2024-002',
+          titulo: 'Solicitud de nueva funcionalidad',
+          estado: 'abierto',
+          prioridad: 'media',
+          created_at: '2024-10-19T14:15:00Z',
+          tipo_ticket: { nombre: 'Consulta', color: '#6B7280' }
+        },
+        {
+          id: 'demo-3',
+          ticket_number: 'TK-2024-003',
+          titulo: 'Error en generación de reportes',
+          estado: 'cerrado',
+          prioridad: 'alta',
+          created_at: '2024-10-18T09:45:00Z',
+          tipo_ticket: { nombre: 'Soporte Técnico', color: '#3B82F6' }
+        }
       ])
 
-      // Handle KPIs
-      if (kpisResult.error) {
-        throw new Error(kpisResult.error.message)
-      }
-      setKpis(kpisResult.data)
-
-      // Handle recent tickets
-      if (recentTicketsResult.error) {
-        console.error('Error loading recent tickets:', recentTicketsResult.error)
-      } else {
-        setRecentTickets(recentTicketsResult.data || [])
-      }
-
-      // Handle evolution data
-      if (evolutionResult.error) {
-        console.error('Error loading evolution data:', evolutionResult.error)
-      } else {
-        setTicketEvolution(evolutionResult.data || [])
-      }
+      setTicketEvolution([
+        { date: '2024-10-14', tickets: 3 },
+        { date: '2024-10-15', tickets: 1 },
+        { date: '2024-10-16', tickets: 4 },
+        { date: '2024-10-17', tickets: 2 },
+        { date: '2024-10-18', tickets: 5 },
+        { date: '2024-10-19', tickets: 2 },
+        { date: '2024-10-20', tickets: 3 }
+      ])
 
     } catch (error) {
-      console.error('Error loading client dashboard data:', error)
-      setError(error.message)
+      console.error('Error in demo mode:', error)
+      setError(null) // Clear any errors in demo mode
     } finally {
       setIsLoading(false)
     }
