@@ -1,4 +1,4 @@
-import { useAuth } from '../../hooks/useAuth'
+import { useAuth } from '../../contexts/AuthContext'
 import ClientDashboard from './ClientDashboard'
 import TechnicianDashboard from './TechnicianDashboard'
 import AdminDashboard from './AdminDashboard'

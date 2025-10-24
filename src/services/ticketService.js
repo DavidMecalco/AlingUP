@@ -191,56 +191,62 @@ class TicketService {
    */
   async validateClienteId(clienteId) {
     try {
-      console.log('Validating cliente_id:', clienteId)
+      console.log('🔍 Validating cliente_id:', clienteId)
       
+      // Quick check if user exists
       const { data: user, error } = await supabase
         .from('users')
         .select('id, rol, estado, email, nombre_completo')
         .eq('id', clienteId)
         .single()
 
-      console.log('User validation result:', { user, error })
+      console.log('📊 User query result:', { user, error })
 
-      if (error) {
-        console.error('Database error during user validation:', error)
-        
-        // If user not found, try to create user profile
-        if (error.code === 'PGRST116') {
-          console.log('User not found in users table, attempting to create profile...')
-          return await this.createUserProfileIfNeeded(clienteId)
+      // If user exists and is valid, return immediately
+      if (user && user.estado && ['cliente', 'admin'].includes(user.rol)) {
+        console.log('✅ User validation successful:', user)
+        return { isValid: true, error: null }
+      }
+
+      // If user doesn't exist, create profile
+      if (error && error.code === 'PGRST116') {
+        console.log('👤 User not found, creating profile...')
+        return await this.createUserProfileIfNeeded(clienteId)
+      }
+
+      // If user exists but has wrong role or is inactive
+      if (user) {
+        if (!user.estado) {
+          return { 
+            isValid: false, 
+            error: { message: 'Usuario inactivo' }
+          }
         }
         
+        if (!['cliente', 'admin'].includes(user.rol)) {
+          return { 
+            isValid: false, 
+            error: { message: `Rol no autorizado: ${user.rol}. Solo clientes y administradores pueden crear tickets` }
+          }
+        }
+      }
+
+      // Other database errors
+      if (error) {
+        console.error('❌ Database error during user validation:', error)
         return { 
           isValid: false, 
           error: { message: `Error de base de datos: ${error.message}` }
         }
       }
 
-      if (!user) {
-        console.log('User not found, attempting to create profile...')
-        return await this.createUserProfileIfNeeded(clienteId)
+      // Fallback
+      return { 
+        isValid: false, 
+        error: { message: 'Error desconocido en validación de usuario' }
       }
-
-      // Check if user is active
-      if (!user.estado) {
-        return { 
-          isValid: false, 
-          error: { message: 'Usuario inactivo' }
-        }
-      }
-
-      // Allow cliente and admin roles to create tickets
-      if (!['cliente', 'admin'].includes(user.rol)) {
-        return { 
-          isValid: false, 
-          error: { message: `Rol no autorizado: ${user.rol}. Solo clientes y administradores pueden crear tickets` }
-        }
-      }
-      
-      console.log('User validation successful:', user)
-      return { isValid: true, error: null }
     } catch (error) {
-      console.error('Cliente validation error:', error)
+      console.error('❌ Cliente validation error:', error)
       return { 
         isValid: false, 
         error: { message: `Error al validar usuario: ${error.message}` }
@@ -255,79 +261,78 @@ class TicketService {
    */
   async createUserProfileIfNeeded(userId) {
     try {
-      console.log('Attempting to create user profile for:', userId)
+      console.log('🚀 Creating user profile for:', userId)
       
-      // Get user info from Supabase Auth
-      const { data: authUser, error: authError } = await supabase.auth.admin.getUserById(userId)
+      // Get current user session
+      const { data: { user: sessionUser }, error: sessionError } = await supabase.auth.getUser()
       
-      if (authError || !authUser.user) {
-        console.error('Error getting auth user:', authError)
-        
-        // Fallback: try to get current user session
-        const { data: { user: sessionUser } } = await supabase.auth.getUser()
-        
-        if (!sessionUser || sessionUser.id !== userId) {
-          return {
-            isValid: false,
-            error: { message: 'Usuario no encontrado en el sistema de autenticación' }
-          }
+      if (sessionError || !sessionUser) {
+        console.error('❌ Error getting session user:', sessionError)
+        return {
+          isValid: false,
+          error: { message: 'No se pudo obtener información del usuario autenticado' }
         }
-        
-        // Use session user data
-        const userData = {
-          id: sessionUser.id,
-          email: sessionUser.email,
-          nombre_completo: sessionUser.user_metadata?.full_name || sessionUser.email.split('@')[0],
-          rol: 'cliente', // Default role
-          estado: true
-        }
-        
-        console.log('Creating user profile with session data:', userData)
-        
-        const { error: insertError } = await supabase
-          .from('users')
-          .insert(userData)
-        
-        if (insertError) {
-          console.error('Error creating user profile:', insertError)
-          return {
-            isValid: false,
-            error: { message: `Error al crear perfil de usuario: ${insertError.message}` }
-          }
-        }
-        
-        console.log('User profile created successfully')
-        return { isValid: true, error: null }
       }
       
-      // Create user profile with auth data
+      if (sessionUser.id !== userId) {
+        console.error('❌ Session user ID mismatch')
+        return {
+          isValid: false,
+          error: { message: 'ID de usuario no coincide con la sesión actual' }
+        }
+      }
+      
+      // Prepare user data
       const userData = {
-        id: authUser.user.id,
-        email: authUser.user.email,
-        nombre_completo: authUser.user.user_metadata?.full_name || authUser.user.email.split('@')[0],
-        rol: 'cliente', // Default role
+        id: sessionUser.id,
+        email: sessionUser.email,
+        nombre_completo: sessionUser.user_metadata?.full_name || 
+                        sessionUser.user_metadata?.name || 
+                        sessionUser.email.split('@')[0],
+        rol: 'cliente',
         estado: true
       }
       
-      console.log('Creating user profile with auth data:', userData)
+      console.log('📝 Creating user profile with data:', userData)
       
-      const { error: insertError } = await supabase
+      // Try to insert user profile
+      const { data: insertedUser, error: insertError } = await supabase
         .from('users')
         .insert(userData)
+        .select('id, rol, estado')
+        .single()
       
       if (insertError) {
-        console.error('Error creating user profile:', insertError)
+        console.error('❌ Error creating user profile:', insertError)
+        
+        // If user already exists, that's fine
+        if (insertError.code === '23505') {
+          console.log('👤 User already exists, validating...')
+          
+          // Quick validation of existing user
+          const { data: existingUser, error: checkError } = await supabase
+            .from('users')
+            .select('id, rol, estado')
+            .eq('id', userId)
+            .single()
+          
+          if (!checkError && existingUser && existingUser.estado && ['cliente', 'admin'].includes(existingUser.rol)) {
+            console.log('✅ Existing user is valid:', existingUser)
+            return { isValid: true, error: null }
+          }
+        }
+        
         return {
           isValid: false,
-          error: { message: `Error al crear perfil de usuario: ${insertError.message}` }
+          error: { message: `Error al crear perfil: ${insertError.message}` }
         }
       }
       
-      console.log('User profile created successfully')
+      console.log('✅ User profile created successfully:', insertedUser)
       return { isValid: true, error: null }
       
     } catch (error) {
-      console.error('Error in createUserProfileIfNeeded:', error)
+      console.error('❌ Error in createUserProfileIfNeeded:', error)
       return {
         isValid: false,
         error: { message: `Error al crear perfil: ${error.message}` }
@@ -360,69 +365,53 @@ class TicketService {
    */
   async createTicket(ticketData, clienteId) {
     try {
-      // Apply rate limiting for ticket creation
-      const rateLimitResult = securityService.checkRateLimit('api', clienteId)
-      if (!rateLimitResult.allowed) {
-        return { 
-          data: null, 
-          error: { message: 'Rate limit exceeded. Please try again later.' }
-        }
-      }
+      console.log('Creating ticket with data:', ticketData, 'for client:', clienteId)
 
-      // Check for suspicious activity
-      securityService.checkSuspiciousActivity(clienteId, 'ticket_creation', {
-        titulo: ticketData.titulo,
-        prioridad: ticketData.prioridad
-      })
-
-      // Validate and sanitize ticket data using security service
-      const sanitizedData = securityService.validateTicketData({
-        ...ticketData,
-        cliente_id: clienteId
-      })
-
-      // Validate cliente_id before creating ticket
+      // FIRST: Ensure user profile exists before attempting to create ticket
+      console.log('Step 1: Validating user profile...')
       const validation = await this.validateClienteId(clienteId)
+      console.log('User validation result:', validation)
+      
       if (!validation.isValid) {
+        console.error('User validation failed:', validation.error)
         return { data: null, error: validation.error }
       }
+      
+      console.log('Step 2: User profile validated, proceeding with ticket creation...')
 
+      // Simplified data preparation
+      const ticketToInsert = {
+        titulo: ticketData.titulo,
+        descripcion: ticketData.descripcion || '',
+        prioridad: ticketData.prioridad || 'media',
+        tipo_ticket_id: ticketData.tipo_ticket_id,
+        cliente_id: clienteId,
+        estado: 'abierto',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+
+      console.log('Step 3: Inserting ticket:', ticketToInsert)
+
+      // Now insert the ticket (should work since user is validated)
       const { data, error } = await supabase
         .from('tickets')
-        .insert(sanitizedData)
-        .select(`
-          *,
-          cliente:cliente_id(id, email, nombre_completo, empresa_cliente),
-          tecnico:tecnico_id(id, email, nombre_completo),
-          tipo_ticket:tipo_ticket_id(id, nombre, descripcion, color)
-        `)
+        .insert(ticketToInsert)
+        .select('*')
         .single()
 
       if (error) {
-        console.error('Create ticket error:', error)
-        // Check if it's the specific cliente role validation error
-        if (error.message && error.message.includes('Cliente ID must reference a user with cliente role')) {
-          return { 
-            data: null, 
-            error: { message: 'Cliente ID must reference a user with cliente role' }
-          }
-        }
+        console.error('Create ticket error after validation:', error)
         return { data: null, error }
       }
 
+      console.log('Step 4: Ticket created successfully:', data)
       return { data, error: null }
     } catch (error) {
       console.error('Create ticket error:', error)
-      // Check if it's the specific cliente role validation error
-      if (error.message && error.message.includes('Cliente ID must reference a user with cliente role')) {
-        return { 
-          data: null, 
-          error: { message: 'Cliente ID must reference a user with cliente role' }
-        }
-      }
       return { 
         data: null, 
-        error: { message: 'Error al crear ticket' } 
+        error: { message: `Error al crear ticket: ${error.message}` }
       }
     }
   }

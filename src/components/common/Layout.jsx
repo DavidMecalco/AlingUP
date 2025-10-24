@@ -72,7 +72,7 @@ const Layout = ({ children }) => {
           {/* Main content */}
           <main 
             id="main-content"
-            className="flex-1"
+            className="flex-1 lg:ml-0"
             role="main"
             aria-label="Contenido principal"
           >

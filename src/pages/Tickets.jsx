@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AuthenticatedRoute } from '../components/auth/ProtectedRoute'
 import { useAuth } from '../hooks/useAuth'
 import TicketList from '../components/tickets/TicketList'
 import GlassCard from '../components/common/GlassCard'
@@ -68,8 +67,7 @@ const Tickets = () => {
   const hasActiveFilters = Object.keys(filters).length > 0
 
   return (
-    <AuthenticatedRoute>
-      <div className="min-h-screen p-6 space-y-8">
+    <div className="min-h-screen p-6 space-y-8">
         {/* Hero Header */}
         <GlassCard className="animate-slide-in relative overflow-hidden">
           {/* Floating decorative elements */}
@@ -281,7 +279,6 @@ const Tickets = () => {
           />
         </GlassCard>
       </div>
-    </AuthenticatedRoute>
   )
 }
 

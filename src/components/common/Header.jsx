@@ -1,16 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Menu, X, User, LogOut, Settings } from 'lucide-react';
 import AlingUPLogo from './AlingUPLogo';
 import '../../styles/glass.css';
 
 const Header = ({ onMenuToggle, isMobileMenuOpen }) => {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    if (isProfileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isProfileMenuOpen]);
 
   const handleLogout = async () => {
     try {
-      await logout();
+      console.log('Attempting to logout...');
+      await signOut();
+      console.log('Logout successful');
     } catch (error) {
       console.error('Error logging out:', error);
     }
@@ -38,11 +60,12 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }) => {
         </div>
 
         {/* User menu */}
-        <div className="relative">
+        <div className="relative" ref={profileMenuRef}>
           <button
             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
             className="glass-button flex items-center space-x-3 p-3 rounded-2xl text-white/80 hover:text-white focus:outline-none focus:ring-2 focus:ring-purple-400/50 transition-all duration-200"
             aria-label="Menú de usuario"
+            aria-expanded={isProfileMenuOpen}
           >
             <div className="w-8 h-8 glass-morphism bg-gradient-to-br from-purple-500/30 to-indigo-500/30 rounded-xl flex items-center justify-center">
               <User className="h-4 w-4 text-white" />
@@ -54,33 +77,40 @@ const Header = ({ onMenuToggle, isMobileMenuOpen }) => {
 
           {/* Profile dropdown */}
           {isProfileMenuOpen && (
-            <div className="absolute right-0 mt-3 w-64 glass-modal animate-scale-in">
-              <div className="p-2">
-                <div className="px-4 py-3 border-b border-white/10">
-                  <div className="font-medium text-white">{user?.nombre_completo}</div>
-                  <div className="text-white/70 text-sm">{user?.email}</div>
-                  <div className="inline-flex items-center px-2 py-1 rounded-lg bg-purple-500/20 text-purple-300 text-xs font-medium mt-2 capitalize">
-                    {user?.rol}
+            <div className="absolute right-0 mt-3 w-64 z-50 glass-modal animate-scale-in shadow-2xl">
+                <div className="p-2">
+                  <div className="px-4 py-3 border-b border-white/20">
+                    <div className="font-medium text-white">{user?.nombre_completo}</div>
+                    <div className="text-white/80 text-sm">{user?.email}</div>
+                    <div className="inline-flex items-center px-2 py-1 rounded-lg bg-purple-500/30 text-purple-200 text-xs font-medium mt-2 capitalize">
+                      {user?.rol}
+                    </div>
                   </div>
+                  
+                  <button
+                    onClick={() => {
+                      setIsProfileMenuOpen(false)
+                      // TODO: Navigate to settings page
+                      console.log('Navigate to settings')
+                    }}
+                    className="glass-button flex items-center w-full px-4 py-3 text-sm text-white hover:text-white hover:bg-white/20 rounded-xl mt-2 transition-all duration-200"
+                  >
+                    <Settings className="h-4 w-4 mr-3" />
+                    Configuración
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setIsProfileMenuOpen(false)
+                      handleLogout()
+                    }}
+                    className="glass-button flex items-center w-full px-4 py-3 text-sm text-white hover:text-white hover:bg-red-500/20 rounded-xl mt-1 transition-all duration-200"
+                  >
+                    <LogOut className="h-4 w-4 mr-3" />
+                    Cerrar Sesión
+                  </button>
                 </div>
-                
-                <button
-                  onClick={() => setIsProfileMenuOpen(false)}
-                  className="glass-button flex items-center w-full px-4 py-3 text-sm text-white/80 hover:text-white rounded-xl mt-2 transition-all duration-200"
-                >
-                  <Settings className="h-4 w-4 mr-3" />
-                  Configuración
-                </button>
-                
-                <button
-                  onClick={handleLogout}
-                  className="glass-button flex items-center w-full px-4 py-3 text-sm text-white/80 hover:text-white rounded-xl mt-1 transition-all duration-200"
-                >
-                  <LogOut className="h-4 w-4 mr-3" />
-                  Cerrar Sesión
-                </button>
               </div>
-            </div>
           )}
         </div>
       </div>

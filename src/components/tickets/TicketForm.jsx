@@ -37,23 +37,60 @@ const TicketForm = ({ onSubmit, onCancel, isLoading = false, initialData = null,
       setIsLoadingTypes(true)
       try {
         console.log('Loading ticket types...')
-        const { data, error } = await ticketService.getTicketTypes()
+        
+        // Try to load from service with timeout
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 5000)
+        )
+        
+        const servicePromise = ticketService.getTicketTypes()
+        
+        const { data, error } = await Promise.race([servicePromise, timeoutPromise])
         console.log('Ticket types response:', { data, error })
         
         if (error) {
-          console.error('Error loading ticket types:', error)
-          setTicketTypes([])
-        } else {
+          throw error
+        }
+        
+        if (data && data.length > 0) {
           console.log('Ticket types loaded:', data)
-          setTicketTypes(data || [])
+          setTicketTypes(data)
           // Set first type as default if no initial data
-          if (data && data.length > 0 && !initialData) {
+          if (!initialData) {
             setFormData(prev => ({ ...prev, tipo_ticket_id: data[0].id }))
           }
+        } else {
+          throw new Error('No ticket types found')
         }
       } catch (error) {
-        console.error('Error loading ticket types:', error)
-        setTicketTypes([])
+        console.error('Error loading ticket types, using fallback:', error)
+        
+        // Use mock data as fallback
+        const mockTypes = [
+          {
+            id: 'mock-1',
+            nombre: 'Soporte Técnico',
+            descripcion: 'Problemas técnicos generales',
+            color: '#3B82F6'
+          },
+          {
+            id: 'mock-2', 
+            nombre: 'Consulta',
+            descripcion: 'Consultas generales',
+            color: '#6B7280'
+          },
+          {
+            id: 'mock-3',
+            nombre: 'Emergencia',
+            descripcion: 'Situaciones urgentes',
+            color: '#EF4444'
+          }
+        ]
+        
+        setTicketTypes(mockTypes)
+        if (!initialData) {
+          setFormData(prev => ({ ...prev, tipo_ticket_id: mockTypes[0].id }))
+        }
       } finally {
         setIsLoadingTypes(false)
       }

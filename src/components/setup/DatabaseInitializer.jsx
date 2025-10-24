@@ -24,52 +24,43 @@ const DatabaseInitializer = ({ onInitialized, children }) => {
     try {
       setStatus({
         stage: 'checking',
-        message: 'Verificando base de datos...',
+        message: 'Verificando configuración...',
         details: null,
         canRetry: false
       })
 
-      // Initialize database
-      const dbResults = await initializeDatabase()
-      
+      console.log('Starting simplified initialization...')
+
+      // Just ensure ticket types exist - this is the most critical part
       setStatus({
         stage: 'initializing',
         message: 'Configurando tipos de tickets...',
-        details: dbResults,
+        details: null,
         canRetry: false
       })
 
-      // Ensure ticket types exist
       const ticketTypesResult = await ensureTicketTypesExist()
+      console.log('Ticket types result:', ticketTypesResult)
       
-      if (dbResults.usersTable.exists && 
-          (dbResults.userProfile?.success || dbResults.userProfile === null) &&
-          ticketTypesResult.success) {
-        
+      if (ticketTypesResult.success) {
+        console.log('Initialization successful!')
         setStatus({
           stage: 'complete',
-          message: 'Configuración completada exitosamente',
-          details: { ...dbResults, ticketTypes: ticketTypesResult },
+          message: 'Sistema listo para usar',
+          details: { ticketTypes: ticketTypesResult },
           canRetry: false
         })
         
-        onInitialized?.(true)
+        // Small delay to show success message
+        setTimeout(() => {
+          onInitialized?.(true)
+        }, 1000)
       } else {
-        const errors = []
-        if (!dbResults.usersTable.exists) {
-          errors.push(`Tabla users: ${dbResults.usersTable.error}`)
-        }
-        if (dbResults.userProfile && !dbResults.userProfile.success) {
-          errors.push(`Perfil usuario: ${dbResults.userProfile.error}`)
-        }
-        if (!ticketTypesResult.success) {
-          errors.push(`Tipos tickets: ${ticketTypesResult.message}`)
-        }
-
+        console.log('Ticket types initialization failed:', ticketTypesResult.message)
         setStatus({
           stage: 'error',
-          message: 'Error en la configuración',
-          details: { errors, dbResults, ticketTypes: ticketTypesResult },
+          message: 'Error configurando tipos de tickets',
+          details: { error: ticketTypesResult.message },
           canRetry: true
         })
         

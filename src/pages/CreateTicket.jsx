@@ -1,9 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AuthenticatedRoute } from '../components/auth/ProtectedRoute'
 import { useAuth } from '../hooks/useAuth'
-import { useUserProfile } from '../hooks/useUserProfile'
-import DatabaseInitializer from '../components/setup/DatabaseInitializer'
 import TicketForm from '../components/tickets/TicketForm'
 import TicketIdDisplay from '../components/tickets/TicketIdDisplay'
 import GlassCard from '../components/common/GlassCard'
@@ -21,36 +18,54 @@ import {
   Target,
   MessageSquare,
   AlertCircle,
-  Zap
+  Zap,
+  Loader
 } from 'lucide-react'
 import '../styles/glass.css'
 
 const CreateTicket = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { profile, loading: profileLoading, error: profileError, hasValidProfile, refreshProfile } = useUserProfile()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [createdTicket, setCreatedTicket] = useState(null)
-  const [databaseReady, setDatabaseReady] = useState(false)
 
   const handleSubmit = async (formData) => {
     setIsSubmitting(true)
     setError(null)
 
     try {
-      const { data, error } = await ticketService.createTicket(formData, user.id)
+      console.log('Creating ticket with data:', formData)
+      console.log('User ID:', user.id)
+      
+      // Add timeout to prevent hanging (increased to 30 seconds)
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('La creación del ticket está tomando demasiado tiempo. Inténtalo de nuevo.')), 30000)
+      )
+      
+      const createPromise = ticketService.createTicket(formData, user.id)
+      
+      const { data, error } = await Promise.race([createPromise, timeoutPromise])
+      
+      console.log('Create ticket response:', { data, error })
       
       if (error) {
+        console.error('Service returned error:', error)
         setError(error.message || 'Error al crear el ticket')
         return
       }
 
+      if (!data) {
+        setError('No se recibió respuesta del servidor')
+        return
+      }
+
+      console.log('Ticket created successfully:', data)
       // Success - show created ticket info
       setCreatedTicket(data)
     } catch (error) {
       console.error('Create ticket error:', error)
-      setError('Error inesperado al crear el ticket')
+      setError(error.message || 'Error inesperado al crear el ticket')
     } finally {
       setIsSubmitting(false)
     }
@@ -70,9 +85,7 @@ const CreateTicket = () => {
   }
 
   return (
-    <AuthenticatedRoute allowedRoles={['cliente', 'admin']}>
-      <DatabaseInitializer onInitialized={setDatabaseReady}>
-        <div className="min-h-screen p-6 space-y-8">
+    <div className="min-h-screen p-6 space-y-8">
         {/* Hero Header */}
         <GlassCard className="animate-slide-in relative overflow-hidden">
           {/* Floating decorative elements */}
@@ -195,68 +208,7 @@ const CreateTicket = () => {
             </div>
           </GlassCard>
         )}
-        {/* Profile Status */}
-        {profileLoading && (
-          <GlassCard className="animate-slide-in">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center">
-                <Loader className="w-6 h-6 text-blue-400 animate-spin" />
-              </div>
-              <div>
-                <h3 className="text-lg font-medium text-white mb-1">
-                  Verificando perfil de usuario...
-                </h3>
-                <p className="text-white/70">Esto puede tomar unos segundos</p>
-              </div>
-            </div>
-          </GlassCard>
-        )}
 
-        {/* Profile Error */}
-        {profileError && (
-          <GlassCard variant="error" className="animate-slide-in">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center">
-                  <AlertCircle className="w-6 h-6 text-red-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-white mb-1">
-                    Error en el perfil de usuario
-                  </h3>
-                  <p className="text-white/80">{profileError}</p>
-                </div>
-              </div>
-              <button
-                onClick={refreshProfile}
-                className="glass-button px-4 py-2 rounded-xl text-white hover:bg-white/10 transition-colors"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-            </div>
-          </GlassCard>
-        )}
-
-        {/* Profile Info */}
-        {profile && !hasValidProfile && (
-          <GlassCard variant="warning" className="animate-slide-in">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center">
-                  <AlertTriangle className="w-6 h-6 text-yellow-400" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-medium text-white mb-1">
-                    Perfil no autorizado
-                  </h3>
-                  <p className="text-white/80">
-                    Tu rol actual ({profile.rol}) no permite crear tickets. Contacta al administrador.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </GlassCard>
-        )}
 
         {/* Error Message */}
         {error && (
@@ -270,21 +222,14 @@ const CreateTicket = () => {
                   Error al crear ticket
                 </h3>
                 <p className="text-white/80">{error}</p>
-                {error.includes('Cliente ID must reference') && (
-                  <button
-                    onClick={refreshProfile}
-                    className="mt-2 glass-button px-4 py-2 rounded-xl text-white text-sm hover:bg-white/10 transition-colors"
-                  >
-                    Actualizar perfil
-                  </button>
-                )}
+
               </div>
             </div>
           </GlassCard>
         )}
 
-        {/* Form Card - Only show if no ticket created yet and profile is valid */}
-        {!createdTicket && !profileLoading && hasValidProfile && (
+        {/* Form Card - Only show if no ticket created yet */}
+        {!createdTicket && (
           <GlassCard className="animate-slide-up" style={{animationDelay: '0.2s'}}>
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center">
@@ -308,8 +253,8 @@ const CreateTicket = () => {
           </GlassCard>
         )}
 
-        {/* Help Section - Only show if no ticket created yet and profile is valid */}
-        {!createdTicket && !profileLoading && hasValidProfile && (
+        {/* Help Section - Only show if no ticket created yet */}
+        {!createdTicket && (
           <GlassCard variant="primary" className="animate-slide-up" style={{animationDelay: '0.4s'}}>
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center">
@@ -379,9 +324,7 @@ const CreateTicket = () => {
             </div>
           </GlassCard>
         )}
-        </div>
-      </DatabaseInitializer>
-    </AuthenticatedRoute>
+      </div>
   )
 }
 

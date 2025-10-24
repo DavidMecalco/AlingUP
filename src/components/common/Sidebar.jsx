@@ -12,10 +12,20 @@ import {
 import '../../styles/glass.css';
 
 const Sidebar = ({ isOpen, onClose }) => {
-  const { user } = useAuth();
+  const { user, getUserRole } = useAuth();
   const location = useLocation();
+  
+  const userRole = getUserRole();
+
+  // Debug logging
+  console.log('Sidebar - User:', user);
+  console.log('Sidebar - User profile:', user?.profile);
+  console.log('Sidebar - User role from getUserRole():', userRole);
+  console.log('Sidebar - User.profile.rol direct:', user?.profile?.rol);
+  console.log('Sidebar - Current location:', location.pathname);
 
   const getNavigationItems = () => {
+    // Always show basic navigation items
     const baseItems = [
       {
         name: 'Dashboard',
@@ -30,6 +40,13 @@ const Sidebar = ({ isOpen, onClose }) => {
         roles: ['cliente', 'tecnico', 'admin']
       }
     ];
+
+    // Add role-specific items if user and role are available
+    if (!userRole) {
+      console.log('No user role found, showing basic items only');
+      // Still show basic items even without role
+      return baseItems;
+    }
 
     const roleSpecificItems = {
       cliente: [
@@ -82,7 +99,8 @@ const Sidebar = ({ isOpen, onClose }) => {
       ]
     };
 
-    const userRoleItems = roleSpecificItems[user?.rol] || [];
+    const userRoleItems = roleSpecificItems[userRole] || [];
+    console.log('Navigation items for role', userRole, ':', [...baseItems, ...userRoleItems]);
     return [...baseItems, ...userRoleItems];
   };
 
@@ -124,13 +142,12 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 z-50 h-full w-64 glass-sidebar transform transition-all duration-300 ease-in-out
-          lg:relative lg:translate-x-0
+          fixed top-0 left-0 z-50 h-screen w-64 glass-sidebar transform transition-all duration-300 ease-in-out
+          lg:relative lg:translate-x-0 lg:z-auto
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
         role="navigation"
         aria-label="Navegación principal"
-        aria-hidden={!isOpen ? 'true' : 'false'}
       >
         {/* Sidebar header */}
         <div className="flex items-center justify-center h-16 px-4 border-b border-white/10 lg:hidden">
