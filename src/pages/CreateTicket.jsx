@@ -2,10 +2,23 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import TicketForm from '../components/tickets/TicketForm'
+import SimpleTicketForm from '../components/tickets/SimpleTicketForm'
 import TicketIdDisplay from '../components/tickets/TicketIdDisplay'
 import GlassCard from '../components/common/GlassCard'
 import AlingUPLogo from '../components/common/AlingUPLogo'
 import ticketService from '../services/ticketService'
+import simpleTicketService from '../services/ticketServiceSimple'
+import ultraSimpleTicketService from '../services/ticketServiceUltraSimple'
+import { checkDatabase, createSimpleTicket } from '../utils/checkDatabase'
+import { ensureTicketTypesExist } from '../utils/seedTicketTypes'
+import { checkRLSStatus, fixRLSPolicies } from '../utils/fixRLS'
+import { verifyTicketsTable, getTableColumns, verifyClienteId, checkTicketTypes, createTicketWithValidType } from '../utils/verifyTable'
+import { testSimpleInsert } from '../services/supabaseSimple'
+import { createTicketDirect, testDirectConnection, createTicketSimple } from '../services/directAPI'
+import { inspectUsersTable, createMinimalUser, tryDifferentUserCreation } from '../services/debugAPI'
+import { createTicketWithCurrentUser, ensureCurrentUserAsCliente } from '../services/userFixAPI'
+import { createBasicTicket } from '../services/basicTicketService'
+import { createTestUsers } from '../utils/createTestUsers'
 import { 
   Plus, 
   CheckCircle, 
@@ -29,6 +42,240 @@ const CreateTicket = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [createdTicket, setCreatedTicket] = useState(null)
+  const [debugInfo, setDebugInfo] = useState(null)
+
+  const handleDebugCheck = async () => {
+    console.log('🔍 Running database check...')
+    const result = await checkDatabase()
+    setDebugInfo(result)
+    console.log('Database check result:', result)
+  }
+
+  const handleSimpleTest = async () => {
+    console.log('🧪 Testing simple ticket creation...')
+    const result = await createSimpleTicket('Test Ticket', 'Test Description', user.id)
+    console.log('Simple test result:', result)
+    if (result.success) {
+      setCreatedTicket(result.data)
+      setError(null)
+    } else {
+      setError(result.error)
+    }
+  }
+
+  const handleInitTicketTypes = async () => {
+    console.log('🎫 Initializing ticket types...')
+    const result = await ensureTicketTypesExist()
+    console.log('Ticket types init result:', result)
+    setDebugInfo(prev => ({ ...prev, ticketTypesInit: result }))
+  }
+
+  const handleTestConnection = async () => {
+    console.log('🔌 Testing database connection...')
+    const result = await ultraSimpleTicketService.testConnection()
+    console.log('Connection test result:', result)
+    setDebugInfo(prev => ({ ...prev, connectionTest: result }))
+  }
+
+  const handleTestPermissions = async () => {
+    console.log('🔐 Testing insert permissions...')
+    const result = await ultraSimpleTicketService.testInsertPermissions()
+    console.log('Permission test result:', result)
+    setDebugInfo(prev => ({ ...prev, permissionTest: result }))
+  }
+
+  const handleCheckRLS = async () => {
+    console.log('🔍 Checking RLS status...')
+    const result = await checkRLSStatus()
+    console.log('RLS status result:', result)
+    setDebugInfo(prev => ({ ...prev, rlsStatus: result }))
+  }
+
+  const handleVerifyTable = async () => {
+    console.log('🔍 Verifying tickets table...')
+    const result = await verifyTicketsTable()
+    console.log('Table verification result:', result)
+    setDebugInfo(prev => ({ ...prev, tableVerification: result }))
+  }
+
+  const handleCheckColumns = async () => {
+    console.log('🔍 Checking table columns...')
+    const result = await getTableColumns()
+    console.log('Column check result:', result)
+    setDebugInfo(prev => ({ ...prev, columnCheck: result }))
+  }
+
+  const handleVerifyClienteId = async () => {
+    console.log('🔍 Verifying cliente_id...')
+    const result = await verifyClienteId(user.id)
+    console.log('Cliente ID verification result:', result)
+    setDebugInfo(prev => ({ ...prev, clienteIdCheck: result }))
+  }
+
+  const handleCheckTicketTypes = async () => {
+    console.log('🔍 Checking ticket types...')
+    const result = await checkTicketTypes()
+    console.log('Ticket types check result:', result)
+    setDebugInfo(prev => ({ ...prev, ticketTypesCheck: result }))
+  }
+
+  const handleCreateWithValidType = async () => {
+    console.log('🔧 Creating ticket with valid type...')
+    const result = await createTicketWithValidType()
+    console.log('Creation with valid type result:', result)
+    setDebugInfo(prev => ({ ...prev, withValidType: result }))
+    if (result.success) {
+      setCreatedTicket(result.data)
+      setError(null)
+    } else {
+      setError(result.error)
+    }
+  }
+
+  const handleTestSimpleClient = async () => {
+    console.log('🧪 Testing simple Supabase client...')
+    const result = await testSimpleInsert()
+    console.log('Simple client test result:', result)
+    setDebugInfo(prev => ({ ...prev, simpleClient: result }))
+    if (result.success) {
+      setCreatedTicket(result.data)
+      setError(null)
+    } else {
+      setError(result.error)
+    }
+  }
+
+  const handleTestDirectAPI = async () => {
+    console.log('🔌 Testing direct API...')
+    const result = await testDirectConnection()
+    console.log('Direct API test result:', result)
+    setDebugInfo(prev => ({ ...prev, directAPI: result }))
+  }
+
+  const handleCreateDirectAPI = async () => {
+    console.log('🚀 Creating ticket with direct API...')
+    const formData = {
+      titulo: 'Test Direct API',
+      descripcion: 'Created using direct fetch API',
+      prioridad: 'media'
+    }
+    const result = await createTicketDirect(formData, user.id, user.email)
+    console.log('Direct API creation result:', result)
+    setDebugInfo(prev => ({ ...prev, directCreation: result }))
+    if (result.success) {
+      setCreatedTicket(result.data)
+      setError(null)
+    } else {
+      setError(result.error)
+    }
+  }
+
+  const handleCreateTestUsers = async () => {
+    console.log('👥 Creating test users...')
+    const result = await createTestUsers()
+    console.log('Test users creation result:', result)
+    setDebugInfo(prev => ({ ...prev, testUsers: result }))
+  }
+
+  const handleCreateSimpleTicket = async () => {
+    console.log('🎯 Creating ticket with simple approach...')
+    const formData = {
+      titulo: 'Simple Test Ticket',
+      descripcion: 'Created with simple approach - no user validation',
+      prioridad: 'media'
+    }
+    const result = await createTicketSimple(formData)
+    console.log('Simple ticket creation result:', result)
+    setDebugInfo(prev => ({ ...prev, simpleCreation: result }))
+    if (result.success) {
+      setCreatedTicket(result.data)
+      setError(null)
+    } else {
+      setError(result.error)
+    }
+  }
+
+  const handleInspectUsers = async () => {
+    console.log('🔍 Inspecting users table...')
+    const result = await inspectUsersTable()
+    console.log('Users table inspection result:', result)
+    setDebugInfo(prev => ({ ...prev, usersInspection: result }))
+  }
+
+  const handleCreateMinimalUser = async () => {
+    console.log('👤 Creating minimal user...')
+    const result = await createMinimalUser()
+    console.log('Minimal user creation result:', result)
+    setDebugInfo(prev => ({ ...prev, minimalUser: result }))
+  }
+
+  const handleTryDifferentApproaches = async () => {
+    console.log('🧪 Trying different user creation approaches...')
+    const result = await tryDifferentUserCreation()
+    console.log('Different approaches result:', result)
+    setDebugInfo(prev => ({ ...prev, differentApproaches: result }))
+  }
+
+  const handleCreateTicketWithCurrentUser = async () => {
+    console.log('🎫 Creating ticket with current user...')
+    const formData = {
+      titulo: 'Ticket with Current User',
+      descripcion: 'Created using current user as cliente',
+      prioridad: 'media'
+    }
+    const result = await createTicketWithCurrentUser(formData, user.id, user.email)
+    console.log('Current user ticket creation result:', result)
+    setDebugInfo(prev => ({ ...prev, currentUserTicket: result }))
+    if (result.success) {
+      setCreatedTicket(result.data)
+      setError(null)
+    } else {
+      setError(result.error)
+    }
+  }
+
+  const handleCreateTicketAuthenticated = async () => {
+    console.log('🔐 Creating ticket with authenticated client...')
+    const formData = {
+      titulo: 'Authenticated Ticket',
+      descripcion: 'Created using authenticated Supabase client',
+      prioridad: 'media'
+    }
+    const result = await createTicketAuthenticated(formData, user.id, user.email)
+    console.log('Authenticated ticket creation result:', result)
+    setDebugInfo(prev => ({ ...prev, authenticatedTicket: result }))
+    if (result.success) {
+      setCreatedTicket(result.data)
+      setError(null)
+    } else {
+      setError(result.error)
+    }
+  }
+
+  const handleCheckSession = async () => {
+    console.log('🔍 Checking user session...')
+    const result = await checkUserSession()
+    console.log('Session check result:', result)
+    setDebugInfo(prev => ({ ...prev, sessionCheck: result }))
+  }
+
+  const handleCreateBasicTicket = async () => {
+    console.log('📝 Creando ticket básico...')
+    const result = await createBasicTicket(
+      'Ticket de Prueba',
+      'Este es un ticket creado con el método básico',
+      'media'
+    )
+    
+    if (result.success) {
+      setCreatedTicket(result.ticket)
+      setError(null)
+      console.log('✅ Ticket creado exitosamente')
+    } else {
+      setError(result.error)
+      console.log('❌ Error creando ticket:', result.error)
+    }
+  }
 
   const handleSubmit = async (formData) => {
     setIsSubmitting(true)
@@ -38,14 +285,9 @@ const CreateTicket = () => {
       console.log('Creating ticket with data:', formData)
       console.log('User ID:', user.id)
       
-      // Add timeout to prevent hanging (increased to 30 seconds)
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('La creación del ticket está tomando demasiado tiempo. Inténtalo de nuevo.')), 30000)
-      )
-      
-      const createPromise = ticketService.createTicket(formData, user.id)
-      
-      const { data, error } = await Promise.race([createPromise, timeoutPromise])
+      // Direct call without timeout for debugging
+      const result = await ultraSimpleTicketService.createTicket(formData, user.id)
+      const { data, error } = result
       
       console.log('Create ticket response:', { data, error })
       
@@ -245,7 +487,31 @@ const CreateTicket = () => {
               </div>
             </div>
 
-            <TicketForm
+            {/* Debug buttons - temporary */}
+            <div className="mb-6 p-4 glass-morphism rounded-xl border border-yellow-400/30 bg-yellow-500/10">
+              <h4 className="text-yellow-400 font-medium mb-3">Debug Tools</h4>
+              <p className="text-green-300/80 text-sm mb-3">
+                🔄 Empezando de cero con enfoque simple<br/>
+                💡 Haz clic en "✅ Crear Ticket Básico" para probar
+              </p>
+              <div className="flex gap-1 flex-wrap">
+                <button
+                  onClick={handleCreateBasicTicket}
+                  className="glass-button px-3 py-2 rounded-lg text-white bg-green-500/20 hover:bg-green-500/30 transition-colors text-sm font-medium"
+                >
+                  ✅ Crear Ticket Básico
+                </button>
+              </div>
+              {debugInfo && (
+                <div className="mt-3 p-3 glass-morphism rounded-lg">
+                  <pre className="text-xs text-white/70 overflow-auto max-h-32">
+                    {JSON.stringify(debugInfo, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+
+            <SimpleTicketForm
               onSubmit={handleSubmit}
               onCancel={handleCancel}
               isLoading={isSubmitting}

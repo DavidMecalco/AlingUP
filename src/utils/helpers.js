@@ -85,7 +85,13 @@ export const formatFileSize = (bytes) => {
  * @returns {Object} Priority configuration
  */
 export const getPriorityConfig = (priority) => {
-  const { PRIORITY_CONFIG } = require('./constants')
+  // Import dinámico para evitar problemas de require
+  const PRIORITY_CONFIG = {
+    urgente: { color: 'red', label: 'Urgente', icon: '🔴' },
+    alta: { color: 'orange', label: 'Alta', icon: '🟠' },
+    media: { color: 'blue', label: 'Media', icon: '🔵' },
+    baja: { color: 'green', label: 'Baja', icon: '🟢' }
+  }
   return PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.media
 }
 
@@ -95,7 +101,12 @@ export const getPriorityConfig = (priority) => {
  * @returns {Object} State configuration
  */
 export const getStateConfig = (state) => {
-  const { STATE_CONFIG } = require('./constants')
+  const STATE_CONFIG = {
+    abierto: { color: 'green', label: 'Abierto', icon: '🟢' },
+    en_progreso: { color: 'blue', label: 'En Progreso', icon: '🔵' },
+    vobo: { color: 'yellow', label: 'VoBo', icon: '🟡' },
+    cerrado: { color: 'gray', label: 'Cerrado', icon: '⚫' }
+  }
   return STATE_CONFIG[state] || STATE_CONFIG.abierto
 }
 
@@ -105,7 +116,11 @@ export const getStateConfig = (state) => {
  * @returns {string} Role label
  */
 export const getRoleLabel = (role) => {
-  const { ROLE_LABELS } = require('./constants')
+  const ROLE_LABELS = {
+    admin: 'Administrador',
+    tecnico: 'Técnico',
+    cliente: 'Cliente'
+  }
   return ROLE_LABELS[role] || role
 }
 
@@ -116,7 +131,12 @@ export const getRoleLabel = (role) => {
  * @returns {boolean} True if transition is valid
  */
 export const isValidStateTransition = (currentState, newState) => {
-  const { STATE_TRANSITIONS } = require('./constants')
+  const STATE_TRANSITIONS = {
+    abierto: ['en_progreso', 'cerrado'],
+    en_progreso: ['vobo', 'abierto', 'cerrado'],
+    vobo: ['cerrado', 'en_progreso'],
+    cerrado: ['abierto']
+  }
   return STATE_TRANSITIONS[currentState]?.includes(newState) || false
 }
 
@@ -127,7 +147,12 @@ export const isValidStateTransition = (currentState, newState) => {
  * @returns {string[]} Available next states
  */
 export const getAvailableStates = (currentState, userRole) => {
-  const { STATE_TRANSITIONS } = require('./constants')
+  const STATE_TRANSITIONS = {
+    abierto: ['en_progreso', 'cerrado'],
+    en_progreso: ['vobo', 'abierto', 'cerrado'],
+    vobo: ['cerrado', 'en_progreso'],
+    cerrado: ['abierto']
+  }
   let availableStates = STATE_TRANSITIONS[currentState] || []
   
   // Filter based on user role

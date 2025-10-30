@@ -1,9 +1,9 @@
+/* Import Glass Morphism Styles */
+@import './styles/glass.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Glass Morphism Styles */
-@import './styles/glass.css';
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;

@@ -202,33 +202,34 @@ class TicketService {
 
       console.log('📊 User query result:', { user, error })
 
-      // If user exists and is valid, return immediately
-      if (user && user.estado && ['cliente', 'admin'].includes(user.rol)) {
-        console.log('✅ User validation successful:', user)
-        return { isValid: true, error: null }
-      }
-
-      // If user doesn't exist, create profile
-      if (error && error.code === 'PGRST116') {
-        console.log('👤 User not found, creating profile...')
-        return await this.createUserProfileIfNeeded(clienteId)
-      }
-
-      // If user exists but has wrong role or is inactive
+      // If user exists, validate their status and role
       if (user) {
-        if (!user.estado) {
+        // Check if user is active (estado should be true or null, not false)
+        if (user.estado === false) {
+          console.log('❌ User is inactive')
           return { 
             isValid: false, 
             error: { message: 'Usuario inactivo' }
           }
         }
         
-        if (!['cliente', 'admin'].includes(user.rol)) {
+        // Check if user has valid role
+        if (!['cliente', 'admin', 'tecnico'].includes(user.rol)) {
+          console.log('❌ Invalid user role:', user.rol)
           return { 
             isValid: false, 
-            error: { message: `Rol no autorizado: ${user.rol}. Solo clientes y administradores pueden crear tickets` }
+            error: { message: `Rol no autorizado: ${user.rol}` }
           }
         }
+        
+        console.log('✅ User validation successful:', user)
+        return { isValid: true, error: null }
+      }
+
+      // If user doesn't exist (PGRST116 = no rows returned)
+      if (error && error.code === 'PGRST116') {
+        console.log('👤 User not found, will attempt to create profile...')
+        return await this.createUserProfileIfNeeded(clienteId)
       }
 
       // Other database errors
@@ -241,6 +242,7 @@ class TicketService {
       }
 
       // Fallback
+      console.log('❌ Unknown validation error')
       return { 
         isValid: false, 
         error: { message: 'Error desconocido en validación de usuario' }
