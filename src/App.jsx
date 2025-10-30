@@ -15,6 +15,7 @@ const TicketDetailPage = React.lazy(() => import('./pages/TicketDetailPage'))
 const KanbanPage = React.lazy(() => import('./pages/KanbanPage'))
 const AdminSettings = React.lazy(() => import('./components/admin/AdminSettings'))
 const AdminPage = React.lazy(() => import('./pages/AdminPage'))
+const DebugPage = React.lazy(() => import('./pages/DebugPage'))
 const NotFound = React.lazy(() => import('./pages/NotFound'))
 
 // Loading fallback component for lazy loaded routes
@@ -39,6 +40,9 @@ function App() {
                   {/* Authentication routes */}
                   <Route path="/login" element={<Login />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
+                  
+                  {/* Debug route (accessible without authentication) */}
+                  <Route path="/debug" element={<DebugPage />} />
                   
                   {/* Protected application routes with layout */}
                   <Route path="/dashboard" element={
