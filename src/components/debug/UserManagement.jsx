@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { createTestUsers, checkTestUsers, getAllUsers } from '../../utils/createTestUsers'
+import { createSampleTickets, checkSampleTickets } from '../../utils/createSampleTickets'
 import { 
   Users, 
   UserPlus, 
@@ -9,7 +10,8 @@ import {
   RefreshCw,
   Eye,
   EyeOff,
-  AlertTriangle
+  AlertTriangle,
+  Ticket
 } from 'lucide-react'
 
 const UserManagement = () => {
@@ -18,6 +20,13 @@ const UserManagement = () => {
     creating: false,
     users: [],
     allUsers: [],
+    message: '',
+    error: null
+  })
+  const [ticketStatus, setTicketStatus] = useState({
+    checking: false,
+    creating: false,
+    tickets: [],
     message: '',
     error: null
   })
@@ -73,8 +82,57 @@ const UserManagement = () => {
     }
   }
 
+  const checkTickets = async () => {
+    setTicketStatus(prev => ({ ...prev, checking: true, error: null }))
+    
+    try {
+      const result = await checkSampleTickets()
+      
+      setTicketStatus(prev => ({
+        ...prev,
+        checking: false,
+        tickets: result.tickets || [],
+        message: result.message,
+        error: result.success ? null : result.error
+      }))
+    } catch (error) {
+      setTicketStatus(prev => ({
+        ...prev,
+        checking: false,
+        error: error.message
+      }))
+    }
+  }
+
+  const createTickets = async () => {
+    setTicketStatus(prev => ({ ...prev, creating: true, error: null }))
+    
+    try {
+      const result = await createSampleTickets()
+      
+      setTicketStatus(prev => ({
+        ...prev,
+        creating: false,
+        message: result.message,
+        error: result.success ? null : result.error
+      }))
+
+      // Refresh the ticket list
+      if (result.success) {
+        await checkTickets()
+      }
+    } catch (error) {
+      setTicketStatus(prev => ({
+        ...prev,
+        creating: false,
+        error: error.message
+      }))
+    }
+  }
+
   useEffect(() => {
     checkUsers()
+    checkTickets()
   }, [])
 
   const getRoleColor = (role) => {
@@ -241,6 +299,95 @@ const UserManagement = () => {
           )}
         </div>
       )}
+
+      {/* Sample Tickets */}
+      <div className="glass-morphism rounded-xl p-6 border border-white/10">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <Ticket className="w-6 h-6 text-green-400" />
+            <h3 className="text-lg font-semibold text-white">Tickets de Ejemplo</h3>
+          </div>
+          <button
+            onClick={checkTickets}
+            disabled={ticketStatus.checking}
+            className="glass-button p-2 rounded-lg hover:bg-white/10 transition-colors"
+            title="Actualizar lista de tickets"
+          >
+            <RefreshCw className={`w-4 h-4 text-white/70 ${ticketStatus.checking ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+
+        {ticketStatus.message && (
+          <div className="mb-4 p-3 glass-morphism rounded-lg">
+            <p className="text-white/80 text-sm">{ticketStatus.message}</p>
+          </div>
+        )}
+
+        {ticketStatus.error && (
+          <div className="mb-4 p-3 glass-morphism bg-red-500/20 border-red-400/30 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <AlertTriangle className="w-4 h-4 text-red-400" />
+              <p className="text-red-400 text-sm">{ticketStatus.error}</p>
+            </div>
+          </div>
+        )}
+
+        <button
+          onClick={createTickets}
+          disabled={ticketStatus.creating || ticketStatus.checking}
+          className="glass-button w-full px-4 py-3 rounded-xl text-white font-medium bg-green-500/20 hover:bg-green-500/30 transition-all duration-200 flex items-center justify-center space-x-2 mb-4"
+        >
+          {ticketStatus.creating ? (
+            <>
+              <Loader className="w-4 h-4 animate-spin" />
+              <span>Creando tickets de ejemplo...</span>
+            </>
+          ) : (
+            <>
+              <Ticket className="w-4 h-4" />
+              <span>Crear Tickets de Ejemplo</span>
+            </>
+          )}
+        </button>
+
+        {ticketStatus.tickets.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-white/70 text-sm mb-3">
+              Tickets encontrados: {ticketStatus.tickets.length}
+            </p>
+            <div className="max-h-32 overflow-y-auto space-y-1">
+              {ticketStatus.tickets.slice(0, 5).map((ticket, index) => (
+                <div key={index} className="glass-morphism rounded-lg p-2 flex items-center justify-between">
+                  <span className="text-white/80 text-sm truncate">{ticket.titulo}</span>
+                  <div className="flex items-center space-x-2">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      ticket.prioridad === 'urgente' ? 'bg-red-500/20 text-red-300' :
+                      ticket.prioridad === 'alta' ? 'bg-orange-500/20 text-orange-300' :
+                      ticket.prioridad === 'media' ? 'bg-blue-500/20 text-blue-300' :
+                      'bg-gray-500/20 text-gray-300'
+                    }`}>
+                      {ticket.prioridad}
+                    </span>
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      ticket.estado === 'abierto' ? 'bg-green-500/20 text-green-300' :
+                      ticket.estado === 'en_progreso' ? 'bg-blue-500/20 text-blue-300' :
+                      ticket.estado === 'vobo' ? 'bg-yellow-500/20 text-yellow-300' :
+                      'bg-purple-500/20 text-purple-300'
+                    }`}>
+                      {ticket.estado}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              {ticketStatus.tickets.length > 5 && (
+                <p className="text-white/50 text-xs text-center">
+                  ... y {ticketStatus.tickets.length - 5} más
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Credentials Info */}
       <div className="glass-morphism rounded-xl p-6 border border-yellow-400/30 bg-yellow-500/10">

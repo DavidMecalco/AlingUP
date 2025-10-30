@@ -4,6 +4,7 @@ import { TICKET_STATES, STATE_CONFIG, STATE_TRANSITIONS } from '../../utils/cons
 import TicketCard from './TicketCard'
 import { useTickets } from '../../hooks/useTickets'
 import { useAuth } from '../../hooks/useAuth'
+import '../../styles/kanban.css'
 
 const KanbanBoard = ({ filters = {}, searchTerm = '' }) => {
   const { user } = useAuth()
@@ -20,6 +21,9 @@ const KanbanBoard = ({ filters = {}, searchTerm = '' }) => {
   })
 
   const [dragError, setDragError] = useState(null)
+  
+  // Get user role consistently
+  const userRole = user?.rol || user?.profile?.rol
 
   // Define the Kanban columns in order
   const columns = [
@@ -38,7 +42,7 @@ const KanbanBoard = ({ filters = {}, searchTerm = '' }) => {
   // Validate state transition
   const isValidTransition = (fromState, toState) => {
     // Admins can move tickets to any state
-    if (user?.rol === 'admin') {
+    if (userRole === 'admin') {
       return true
     }
 
@@ -78,7 +82,7 @@ const KanbanBoard = ({ filters = {}, searchTerm = '' }) => {
     }
 
     // Only allow technicians to move their assigned tickets
-    if (user?.rol === 'tecnico') {
+    if (userRole === 'tecnico') {
       const ticket = Object.values(ticketsByState)
         .flat()
         .find(t => t.id === ticketId)
@@ -99,25 +103,28 @@ const KanbanBoard = ({ filters = {}, searchTerm = '' }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-        <span className="ml-2 text-gray-600">Cargando tickets...</span>
+      <div className="kanban-loading">
+        <div className="text-center">
+          <div className="kanban-loading-spinner mx-auto mb-4"></div>
+          <p className="text-white/70">Cargando tickets...</p>
+        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <div className="flex items-center">
-          <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="kanban-error">
+        <div className="flex items-center mb-3">
+          <svg className="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span className="text-red-800">{error}</span>
+          <span className="text-red-300 font-medium">Error al cargar tickets</span>
         </div>
+        <p className="text-red-200 text-sm mb-4">{error}</p>
         <button
           onClick={refresh}
-          className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+          className="glass-button px-4 py-2 rounded-lg text-white bg-red-500/20 hover:bg-red-500/30 transition-colors"
         >
           Intentar de nuevo
         </button>
@@ -129,28 +136,38 @@ const KanbanBoard = ({ filters = {}, searchTerm = '' }) => {
     <div className="h-full flex flex-col">
       {/* Board Header */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          {user?.rol === 'tecnico' ? 'Mis Tickets Asignados' : 'Tablero Kanban'}
-        </h2>
-        <p className="text-gray-600">
-          {user?.rol === 'tecnico' 
-            ? 'Gestiona tus tickets asignados arrastrándolos entre columnas'
-            : 'Vista general de todos los tickets del sistema'
-          }
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-2">
+              {userRole === 'tecnico' ? 'Mis Tickets Asignados' : 'Tablero Kanban'}
+            </h2>
+            <p className="text-white/70">
+              {userRole === 'tecnico' 
+                ? 'Arrastra los tickets entre columnas para cambiar su estado'
+                : 'Vista general de todos los tickets del sistema'
+              }
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="glass-morphism rounded-lg px-3 py-2">
+              <span className="text-white/70 text-sm">Total: </span>
+              <span className="text-white font-semibold">{Object.values(ticketsByState).flat().length}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Drag Error */}
       {dragError && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+        <div className="mb-4 glass-morphism bg-red-500/20 border-red-400/30 rounded-xl p-4 animate-slide-in">
           <div className="flex items-center">
-            <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-red-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="text-red-800 text-sm">{dragError}</span>
+            <span className="text-red-300 text-sm flex-1">{dragError}</span>
             <button
               onClick={() => setDragError(null)}
-              className="ml-auto text-red-400 hover:text-red-600"
+              className="ml-3 text-red-400 hover:text-red-300 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -163,7 +180,7 @@ const KanbanBoard = ({ filters = {}, searchTerm = '' }) => {
       {/* Kanban Board */}
       <div className="flex-1 overflow-hidden">
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
+          <div className="kanban-board grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 h-full">
             {columns.map((column) => (
               <KanbanColumn
                 key={column.key}
@@ -182,18 +199,21 @@ const KanbanBoard = ({ filters = {}, searchTerm = '' }) => {
 // Kanban Column Component
 const KanbanColumn = ({ column, tickets, onTicketClick }) => {
   return (
-    <div className="flex flex-col h-full bg-gray-50 rounded-lg border border-gray-200">
+    <div className="kanban-column flex flex-col h-full glass-morphism rounded-xl border border-white/20">
       {/* Column Header */}
-      <div className="flex-shrink-0 p-4 border-b border-gray-200">
+      <div className="kanban-column-header flex-shrink-0 p-4 border-b border-white/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <div 
-              className="w-3 h-3 rounded-full mr-2"
-              style={{ backgroundColor: getStateColor(column.key) }}
+              className="state-indicator w-3 h-3 rounded-full mr-3 shadow-lg"
+              style={{ 
+                backgroundColor: getStateColor(column.key),
+                boxShadow: `0 0 10px ${getStateColor(column.key)}40`
+              }}
             />
-            <h3 className="font-semibold text-gray-900">{column.label}</h3>
+            <h3 className="font-semibold text-white">{column.label}</h3>
           </div>
-          <span className="bg-gray-200 text-gray-700 text-sm font-medium px-2 py-1 rounded-full">
+          <span className="glass-morphism bg-white/20 text-white text-sm font-medium px-3 py-1 rounded-full">
             {tickets.length}
           </span>
         </div>
@@ -205,17 +225,28 @@ const KanbanColumn = ({ column, tickets, onTicketClick }) => {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className={`flex-1 p-4 overflow-y-auto transition-colors duration-200 ${
-              snapshot.isDraggingOver ? 'bg-primary-50' : ''
+            className={`kanban-drop-zone flex-1 p-4 overflow-y-auto transition-all duration-300 ${
+              snapshot.isDraggingOver 
+                ? 'is-dragging-over bg-gradient-to-b from-purple-500/20 to-transparent' 
+                : ''
             }`}
           >
             <div className="space-y-3">
               {tickets.length === 0 ? (
-                <div className="text-center py-8">
-                  <svg className="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  <p className="text-gray-500 text-sm">No hay tickets</p>
+                <div className={`kanban-empty-state text-center py-12 ${
+                  snapshot.isDraggingOver ? 'animate-pulse' : ''
+                }`}>
+                  <div className="w-16 h-16 glass-morphism rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
+                  <p className="text-white/50 text-sm">No hay tickets</p>
+                  {snapshot.isDraggingOver && (
+                    <p className="text-purple-400 text-xs mt-2 animate-bounce">
+                      ✨ Suelta aquí para cambiar estado
+                    </p>
+                  )}
                 </div>
               ) : (
                 tickets.map((ticket, index) => (
@@ -225,9 +256,11 @@ const KanbanColumn = ({ column, tickets, onTicketClick }) => {
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         {...provided.dragHandleProps}
-                        className={`transition-transform duration-200 ${
-                          snapshot.isDragging ? 'rotate-2 scale-105 shadow-lg' : ''
-                        }`}
+                        className={`transition-all duration-200 ${
+                          snapshot.isDragging 
+                            ? 'ticket-card-dragging rotate-2 scale-105 shadow-2xl z-50' 
+                            : 'hover:scale-[1.02] hover:shadow-lg'
+                        } ${getPriorityClass(ticket.prioridad)}`}
                         style={{
                           ...provided.draggableProps.style,
                         }}
@@ -237,6 +270,7 @@ const KanbanColumn = ({ column, tickets, onTicketClick }) => {
                           onClick={onTicketClick}
                           showClient={true}
                           showTechnician={false}
+                          variant="kanban"
                         />
                       </div>
                     )}
@@ -255,12 +289,23 @@ const KanbanColumn = ({ column, tickets, onTicketClick }) => {
 // Helper function to get state color
 const getStateColor = (state) => {
   const colorMap = {
-    [TICKET_STATES.ABIERTO]: '#10b981', // green
+    [TICKET_STATES.ABIERTO]: '#10b981', // emerald
     [TICKET_STATES.EN_PROGRESO]: '#3b82f6', // blue
-    [TICKET_STATES.VOBO]: '#f59e0b', // yellow
-    [TICKET_STATES.CERRADO]: '#6b7280' // gray
+    [TICKET_STATES.VOBO]: '#f59e0b', // amber
+    [TICKET_STATES.CERRADO]: '#8b5cf6' // violet
   }
   return colorMap[state] || '#6b7280'
+}
+
+// Helper function to get priority class
+const getPriorityClass = (priority) => {
+  const priorityClasses = {
+    'urgente': 'priority-urgent',
+    'alta': 'priority-high',
+    'media': 'priority-medium',
+    'baja': 'priority-low'
+  }
+  return priorityClasses[priority] || 'priority-low'
 }
 
 export default KanbanBoard

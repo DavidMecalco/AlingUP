@@ -35,11 +35,12 @@ export const useTickets = ({
         search: searchTerm
       }
 
+      const userRole = user.rol || user.profile?.rol
       let result
-      if (user.rol === 'tecnico') {
+      if (userRole === 'tecnico') {
         // Technicians only see assigned tickets
         result = await ticketService.getTicketsByTechnician(user.id, ticketFilters)
-      } else if (user.rol === 'cliente') {
+      } else if (userRole === 'cliente') {
         // Clients only see their own tickets
         result = await ticketService.getTicketsByClient(user.id, ticketFilters)
       } else {
@@ -108,7 +109,8 @@ export const useTickets = ({
 
   // Assign ticket to technician
   const assignTicket = useCallback(async (ticketId, tecnicoId) => {
-    if (!user || user.rol !== 'admin') {
+    const userRole = user?.rol || user?.profile?.rol
+    if (!user || userRole !== 'admin') {
       return { success: false, error: 'No tienes permisos para asignar tickets' }
     }
 
@@ -149,9 +151,10 @@ export const useTickets = ({
       }
 
       // Add to local state if it matches current filters
-      const shouldInclude = user.rol === 'admin' || 
-                           (user.rol === 'cliente' && result.data.cliente_id === user.id) ||
-                           (user.rol === 'tecnico' && result.data.tecnico_id === user.id)
+      const userRole = user.rol || user.profile?.rol
+      const shouldInclude = userRole === 'admin' || 
+                           (userRole === 'cliente' && result.data.cliente_id === user.id) ||
+                           (userRole === 'tecnico' && result.data.tecnico_id === user.id)
 
       if (shouldInclude) {
         setTickets(prevTickets => [result.data, ...prevTickets])

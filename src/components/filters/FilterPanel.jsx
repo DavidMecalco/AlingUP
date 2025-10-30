@@ -1,50 +1,24 @@
 import React, { useState, useEffect } from 'react'
-import { 
-  TICKET_PRIORITIES, 
-  PRIORITY_CONFIG, 
-  TICKET_STATES, 
-  STATE_CONFIG 
-} from '../../utils/constants'
-import ticketService from '../../services/ticketService'
+import { Filter, ChevronDown, X } from 'lucide-react'
+import { TICKET_STATES, TICKET_PRIORITIES, STATE_CONFIG, PRIORITY_CONFIG } from '../../utils/constants'
 
 const FilterPanel = ({ 
   filters = {}, 
-  onFiltersChange, 
-  showClientFilter = true,
-  showTechnicianFilter = true,
-  showTypeFilter = true 
+  onFiltersChange,
+  showClientFilter = false,
+  showTechnicianFilter = false,
+  showTypeFilter = true,
+  className = ""
 }) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [ticketTypes, setTicketTypes] = useState([])
-  const [users, setUsers] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [localFilters, setLocalFilters] = useState(filters)
 
-  // Load filter options
   useEffect(() => {
-    const loadFilterOptions = async () => {
-      setLoading(true)
-      try {
-        // Load ticket types
-        const typesResult = await ticketService.getTicketTypes()
-        if (!typesResult.error) {
-          setTicketTypes(typesResult.data)
-        }
-
-        // TODO: Load users for client/technician filters
-        // This would require a user service
-        setUsers([])
-      } catch (error) {
-        console.error('Error loading filter options:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadFilterOptions()
-  }, [])
+    setLocalFilters(filters)
+  }, [filters])
 
   const handleFilterChange = (filterType, value, checked) => {
-    const currentValues = filters[filterType] || []
+    const currentValues = localFilters[filterType] || []
     let newValues
 
     if (checked) {
@@ -53,163 +27,166 @@ const FilterPanel = ({
       newValues = currentValues.filter(v => v !== value)
     }
 
-    onFiltersChange({
-      ...filters,
+    const newFilters = {
+      ...localFilters,
       [filterType]: newValues.length > 0 ? newValues : undefined
+    }
+
+    // Remove undefined values
+    Object.keys(newFilters).forEach(key => {
+      if (newFilters[key] === undefined) {
+        delete newFilters[key]
+      }
     })
+
+    setLocalFilters(newFilters)
+    onFiltersChange(newFilters)
   }
 
   const clearAllFilters = () => {
+    setLocalFilters({})
     onFiltersChange({})
   }
 
-  const hasActiveFilters = Object.keys(filters).some(key => 
-    filters[key] && (Array.isArray(filters[key]) ? filters[key].length > 0 : filters[key])
-  )
+  const getActiveFilterCount = () => {
+    return Object.values(localFilters).reduce((count, values) => {
+      return count + (Array.isArray(values) ? values.length : 0)
+    }, 0)
+  }
+
+  const activeCount = getActiveFilterCount()
 
   return (
-    <div className="relative">
-      {/* Filter Toggle Button */}
+    <div className={`relative ${className}`}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg border transition-colors duration-200 ${
-          hasActiveFilters
-            ? 'bg-primary-50 border-primary-200 text-primary-700'
-            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-        }`}
+        className="glass-button px-4 py-3 rounded-xl text-white font-medium bg-white/10 hover:bg-white/20 transition-all duration-200 flex items-center space-x-2"
       >
-        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.414A1 1 0 013 6.707V4z" />
-        </svg>
-        Filtros
-        {hasActiveFilters && (
-          <span className="ml-2 bg-primary-600 text-white text-xs rounded-full px-2 py-0.5">
-            {Object.keys(filters).filter(key => filters[key] && (Array.isArray(filters[key]) ? filters[key].length > 0 : filters[key])).length}
+        <Filter className="w-4 h-4" />
+        <span>Filtros</span>
+        {activeCount > 0 && (
+          <span className="bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+            {activeCount}
           </span>
         )}
-        <svg className={`w-4 h-4 ml-2 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-        </svg>
+        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
-      {/* Filter Panel */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-          <div className="p-4">
-            {/* Header */}
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 z-10" 
+            onClick={() => setIsOpen(false)}
+          />
+          
+          {/* Filter Panel */}
+          <div className="absolute right-0 top-full mt-2 w-80 glass-morphism rounded-xl border border-white/20 shadow-xl z-20 p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Filtros</h3>
-              {hasActiveFilters && (
+              <h3 className="text-lg font-semibold text-white">Filtros</h3>
+              <div className="flex items-center space-x-2">
+                {activeCount > 0 && (
+                  <button
+                    onClick={clearAllFilters}
+                    className="text-sm text-white/70 hover:text-white transition-colors"
+                  >
+                    Limpiar todo
+                  </button>
+                )}
                 <button
-                  onClick={clearAllFilters}
-                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                  onClick={() => setIsOpen(false)}
+                  className="text-white/70 hover:text-white transition-colors"
                 >
-                  Limpiar todo
+                  <X className="w-4 h-4" />
                 </button>
-              )}
+              </div>
             </div>
 
             <div className="space-y-6">
-              {/* Priority Filter */}
-              <FilterSection
-                title="Prioridad"
-                options={Object.entries(PRIORITY_CONFIG).map(([key, config]) => ({
-                  value: key,
-                  label: config.label,
-                  color: config.badgeColor
-                }))}
-                selectedValues={filters.prioridades || []}
-                onChange={(value, checked) => handleFilterChange('prioridades', value, checked)}
-              />
-
-              {/* State Filter */}
+              {/* Estado Filter */}
               <FilterSection
                 title="Estado"
                 options={Object.entries(STATE_CONFIG).map(([key, config]) => ({
                   value: key,
-                  label: config.label,
-                  color: config.badgeColor
+                  label: config.label
                 }))}
-                selectedValues={filters.estados || []}
+                selectedValues={localFilters.estados || []}
                 onChange={(value, checked) => handleFilterChange('estados', value, checked)}
               />
 
-              {/* Ticket Type Filter */}
-              {showTypeFilter && ticketTypes.length > 0 && (
+              {/* Prioridad Filter */}
+              <FilterSection
+                title="Prioridad"
+                options={Object.entries(PRIORITY_CONFIG).map(([key, config]) => ({
+                  value: key,
+                  label: config.label
+                }))}
+                selectedValues={localFilters.prioridades || []}
+                onChange={(value, checked) => handleFilterChange('prioridades', value, checked)}
+              />
+
+              {/* Tipo Filter */}
+              {showTypeFilter && (
                 <FilterSection
-                  title="Tipo de Ticket"
-                  options={ticketTypes.map(type => ({
-                    value: type.id,
-                    label: type.nombre,
-                    color: 'gray'
-                  }))}
-                  selectedValues={filters.tipos || []}
+                  title="Tipo"
+                  options={[
+                    { value: 'soporte_tecnico', label: 'Soporte Técnico' },
+                    { value: 'consulta', label: 'Consulta' },
+                    { value: 'incidencia', label: 'Incidencia' },
+                    { value: 'mejora', label: 'Mejora' }
+                  ]}
+                  selectedValues={localFilters.tipos || []}
                   onChange={(value, checked) => handleFilterChange('tipos', value, checked)}
                 />
               )}
 
-              {/* Client Filter */}
-              {showClientFilter && users.length > 0 && (
-                <FilterSection
-                  title="Cliente"
-                  options={users
-                    .filter(user => user.rol === 'cliente')
-                    .map(user => ({
-                      value: user.id,
-                      label: user.nombre_completo,
-                      color: 'gray'
-                    }))}
-                  selectedValues={filters.clientes || []}
-                  onChange={(value, checked) => handleFilterChange('clientes', value, checked)}
-                />
+              {/* Cliente Filter (only for admins) */}
+              {showClientFilter && (
+                <div className="border-t border-white/10 pt-4">
+                  <p className="text-sm text-white/70 mb-2">Cliente</p>
+                  <input
+                    type="text"
+                    placeholder="Buscar cliente..."
+                    className="glass-input w-full px-3 py-2 rounded-lg text-white placeholder-white/50 text-sm"
+                  />
+                </div>
               )}
 
-              {/* Technician Filter */}
-              {showTechnicianFilter && users.length > 0 && (
-                <FilterSection
-                  title="Técnico"
-                  options={users
-                    .filter(user => user.rol === 'tecnico')
-                    .map(user => ({
-                      value: user.id,
-                      label: user.nombre_completo,
-                      color: 'gray'
-                    }))}
-                  selectedValues={filters.tecnicos || []}
-                  onChange={(value, checked) => handleFilterChange('tecnicos', value, checked)}
-                />
+              {/* Técnico Filter (only for admins) */}
+              {showTechnicianFilter && (
+                <div className="border-t border-white/10 pt-4">
+                  <p className="text-sm text-white/70 mb-2">Técnico</p>
+                  <input
+                    type="text"
+                    placeholder="Buscar técnico..."
+                    className="glass-input w-full px-3 py-2 rounded-lg text-white placeholder-white/50 text-sm"
+                  />
+                </div>
               )}
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-0"
-          onClick={() => setIsOpen(false)}
-        />
+        </>
       )}
     </div>
   )
 }
 
-// Filter Section Component
 const FilterSection = ({ title, options, selectedValues, onChange }) => {
   return (
     <div>
-      <h4 className="text-sm font-medium text-gray-900 mb-3">{title}</h4>
+      <p className="text-sm font-medium text-white/90 mb-3">{title}</p>
       <div className="space-y-2">
         {options.map((option) => (
-          <label key={option.value} className="flex items-center">
+          <label key={option.value} className="flex items-center space-x-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={selectedValues.includes(option.value)}
               onChange={(e) => onChange(option.value, e.target.checked)}
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              className="w-4 h-4 text-purple-500 bg-white/10 border-white/30 rounded focus:ring-purple-400 focus:ring-2"
             />
-            <span className="ml-3 text-sm text-gray-700">{option.label}</span>
+            <span className="text-sm text-white/80 group-hover:text-white transition-colors">
+              {option.label}
+            </span>
           </label>
         ))}
       </div>
