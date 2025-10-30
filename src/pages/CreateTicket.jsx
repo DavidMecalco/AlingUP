@@ -282,31 +282,27 @@ const CreateTicket = () => {
     setError(null)
 
     try {
-      console.log('Creating ticket with data:', formData)
-      console.log('User ID:', user.id)
+      console.log('📝 Creating ticket with form data:', formData)
+      console.log('👤 User ID:', user.id)
       
-      // Direct call without timeout for debugging
-      const result = await ultraSimpleTicketService.createTicket(formData, user.id)
-      const { data, error } = result
+      // Use our working basic ticket service
+      const result = await createBasicTicket(
+        formData.titulo,
+        formData.descripcion,
+        formData.prioridad
+      )
       
-      console.log('Create ticket response:', { data, error })
+      console.log('✅ Create ticket response:', result)
       
-      if (error) {
-        console.error('Service returned error:', error)
-        setError(error.message || 'Error al crear el ticket')
-        return
+      if (result.success) {
+        console.log('🎉 Ticket created successfully:', result.ticket)
+        setCreatedTicket(result.ticket)
+      } else {
+        console.error('❌ Service returned error:', result.error)
+        setError(result.error || 'Error al crear el ticket')
       }
-
-      if (!data) {
-        setError('No se recibió respuesta del servidor')
-        return
-      }
-
-      console.log('Ticket created successfully:', data)
-      // Success - show created ticket info
-      setCreatedTicket(data)
     } catch (error) {
-      console.error('Create ticket error:', error)
+      console.error('❌ Create ticket error:', error)
       setError(error.message || 'Error inesperado al crear el ticket')
     } finally {
       setIsSubmitting(false)
