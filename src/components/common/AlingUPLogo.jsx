@@ -43,10 +43,10 @@ const AlingUPLogo = ({
 
   const variantClasses = {
     default: {
-      icon: 'glass-morphism bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-white/30',
-      text: 'text-purple-600',
+      icon: 'glass-morphism bg-gradient-to-br from-blue-500/20 to-emerald-500/20 border-white/30',
+      text: 'text-blue-600',
       textSecondary: 'text-gray-900',
-      iconColor: 'text-purple-600'
+      iconColor: 'text-blue-600'
     },
     light: {
       icon: 'glass-morphism bg-gradient-to-br from-white/20 to-white/10 border-white/40',
@@ -55,16 +55,16 @@ const AlingUPLogo = ({
       iconColor: 'text-white'
     },
     dark: {
-      icon: 'glass-morphism-dark bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border-white/10',
-      text: 'text-purple-300',
-      textSecondary: 'text-gray-100',
-      iconColor: 'text-purple-300'
+      icon: 'glass-strong bg-gradient-to-br from-blue-500/20 to-emerald-500/20 border-white/50',
+      text: 'text-blue-700',
+      textSecondary: 'text-gray-900',
+      iconColor: 'text-blue-700'
     },
     glass: {
-      icon: 'glass-card bg-gradient-to-br from-purple-500/10 to-indigo-500/10',
-      text: 'text-purple-600',
+      icon: 'glass-card bg-gradient-to-br from-blue-500/15 to-emerald-500/15',
+      text: 'text-blue-600',
       textSecondary: 'text-gray-900',
-      iconColor: 'text-purple-600'
+      iconColor: 'text-blue-600'
     }
   };
 

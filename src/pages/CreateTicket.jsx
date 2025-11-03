@@ -362,7 +362,7 @@ const CreateTicket = () => {
                 <p className="text-white/60 text-sm">&lt; 2 horas</p>
               </div>
               <div className="glass-morphism rounded-2xl p-4 text-center">
-                <MessageSquare className="w-6 h-6 text-purple-400 mx-auto mb-2" />
+                <MessageSquare className="w-6 h-6 text-blue-600 mx-auto mb-2" />
                 <p className="text-white font-medium">Soporte 24/7</p>
                 <p className="text-white/60 text-sm">Siempre disponible</p>
               </div>
@@ -435,7 +435,7 @@ const CreateTicket = () => {
                     </button>
                     <button
                       onClick={handleCancel}
-                      className="glass-button px-6 py-3 rounded-2xl text-white font-medium bg-purple-500/20 hover:bg-purple-500/30 transition-all duration-200 flex items-center justify-center space-x-2"
+                      className="glass-button px-6 py-3 rounded-2xl text-slate-800 font-medium bg-blue-500/15 hover:bg-blue-500/25 transition-all duration-200 flex items-center justify-center space-x-2"
                     >
                       <ArrowLeft className="w-4 h-4" />
                       <span>Mis Tickets</span>
@@ -471,7 +471,7 @@ const CreateTicket = () => {
           <GlassCard className="animate-slide-up" style={{animationDelay: '0.2s'}}>
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-12 h-12 glass-morphism rounded-2xl flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-purple-400" />
+                <MessageSquare className="w-6 h-6 text-blue-600" />
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-white mb-1">
@@ -572,8 +572,8 @@ const CreateTicket = () => {
 
               <div className="glass-morphism rounded-2xl p-4">
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 bg-purple-500/20 rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-purple-400 font-bold text-sm">4</span>
+                  <div className="w-8 h-8 bg-emerald-500/15 rounded-xl flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-emerald-600 font-bold text-sm">4</span>
                   </div>
                   <div>
                     <h4 className="text-white font-medium mb-1">Prioridad Correcta</h4>

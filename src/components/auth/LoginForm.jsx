@@ -93,13 +93,16 @@ const LoginForm = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
-        {/* Floating Glass Orbs */}
-        <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute top-40 right-32 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
-        <div className="absolute bottom-32 left-1/3 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-20 right-20 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl animate-float" style={{animationDelay: '0.5s'}}></div>
+      {/* Animated Background - High Contrast White Theme */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-slate-50 to-blue-50">
+        {/* Strong texture overlay for maximum contrast */}
+        <div className="absolute inset-0 bg-white/80"></div>
+        
+        {/* Floating Glass Orbs - Subtle but visible */}
+        <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/8 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-40 right-32 w-96 h-96 bg-indigo-500/6 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
+        <div className="absolute bottom-32 left-1/3 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 right-20 w-64 h-64 bg-slate-500/6 rounded-full blur-3xl animate-float" style={{animationDelay: '0.5s'}}></div>
       </div>
 
       {/* Main Content */}
@@ -107,54 +110,54 @@ const LoginForm = () => {
         <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
           
           {/* Left Side - Branding */}
-          <div className="hidden lg:block space-y-8 text-white">
+          <div className="hidden lg:block space-y-8 text-gray-900">
             <div className="space-y-6">
-              <AlingUPLogo size="xl" variant="light" animated className="mb-8" />
+              <AlingUPLogo size="xl" variant="dark" animated className="mb-8" />
               <h1 className="text-5xl font-bold leading-tight">
                 Gestión de Tickets
-                <span className="block text-3xl font-normal text-white/80 mt-2">
+                <span className="block text-3xl font-normal text-gray-700 mt-2">
                   Nueva Generación
                 </span>
               </h1>
-              <p className="text-xl text-white/70 leading-relaxed">
+              <p className="text-xl text-gray-700 leading-relaxed">
                 Experimenta la evolución en gestión de tickets con tecnología de vanguardia
               </p>
             </div>
 
             {/* Feature Cards */}
             <div className="space-y-4">
-              <div className="glass-morphism rounded-2xl p-6 hover:bg-white/15 transition-all duration-300">
+              <div className="glass-morphism rounded-2xl p-6 hover:glass-hover transition-all duration-300">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 glass-morphism rounded-xl flex items-center justify-center">
-                    <Zap className="w-6 h-6 text-yellow-400" />
+                    <Zap className="w-6 h-6 text-amber-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Velocidad Extrema</h3>
-                    <p className="text-white/70">Procesamiento instantáneo de tickets</p>
+                    <h3 className="font-semibold text-lg text-gray-900">Velocidad Extrema</h3>
+                    <p className="text-gray-700">Procesamiento instantáneo de tickets</p>
                   </div>
                 </div>
               </div>
 
-              <div className="glass-morphism rounded-2xl p-6 hover:bg-white/15 transition-all duration-300">
+              <div className="glass-morphism rounded-2xl p-6 hover:glass-hover transition-all duration-300">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 glass-morphism rounded-xl flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-green-400" />
+                    <Shield className="w-6 h-6 text-emerald-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Seguridad Avanzada</h3>
-                    <p className="text-white/70">Protección de datos de nivel empresarial</p>
+                    <h3 className="font-semibold text-lg text-gray-900">Seguridad Avanzada</h3>
+                    <p className="text-gray-700">Protección de datos de nivel empresarial</p>
                   </div>
                 </div>
               </div>
 
-              <div className="glass-morphism rounded-2xl p-6 hover:bg-white/15 transition-all duration-300">
+              <div className="glass-morphism rounded-2xl p-6 hover:glass-hover transition-all duration-300">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 glass-morphism rounded-xl flex items-center justify-center">
-                    <Users className="w-6 h-6 text-blue-400" />
+                    <Users className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">Colaboración Fluida</h3>
-                    <p className="text-white/70">Trabajo en equipo sin fricciones</p>
+                    <h3 className="font-semibold text-lg text-gray-900">Colaboración Fluida</h3>
+                    <p className="text-gray-700">Trabajo en equipo sin fricciones</p>
                   </div>
                 </div>
               </div>
@@ -165,16 +168,16 @@ const LoginForm = () => {
           <div className="w-full max-w-md mx-auto lg:mx-0">
             {/* Mobile Logo */}
             <div className="lg:hidden text-center mb-8">
-              <AlingUPLogo size="lg" variant="light" animated />
+              <AlingUPLogo size="lg" variant="dark" animated />
             </div>
 
             {/* Glass Login Card */}
-            <div className="glass-card p-8 animate-slide-up">
+            <div className="glass-strong p-8 animate-slide-up rounded-2xl">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-white mb-2">
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
                   Bienvenido
                 </h2>
-                <p className="text-white/70">
+                <p className="text-gray-700">
                   Accede a tu espacio de trabajo
                 </p>
               </div>
@@ -182,12 +185,12 @@ const LoginForm = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Email Field */}
                 <div className="space-y-2">
-                  <label htmlFor="email" className="block text-sm font-medium text-white/90">
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-800">
                     Correo electrónico
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-white/50" />
+                      <Mail className="h-5 w-5 text-gray-500" />
                     </div>
                     <input
                       id="email"
@@ -195,7 +198,7 @@ const LoginForm = () => {
                       type="email"
                       autoComplete="email"
                       required
-                      className={`glass-input w-full pl-12 pr-4 py-4 rounded-2xl text-white placeholder-white/50 focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all duration-300 ${
+                      className={`glass-input w-full pl-12 pr-4 py-4 rounded-2xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-400/50 focus:border-transparent transition-all duration-300 ${
                         formErrors.email ? 'ring-2 ring-red-400/50' : ''
                       }`}
                       placeholder="tu@email.com"
@@ -205,18 +208,18 @@ const LoginForm = () => {
                     />
                   </div>
                   {formErrors.email && (
-                    <p className="text-red-400 text-sm mt-1">{formErrors.email}</p>
+                    <p className="text-red-700 text-sm mt-1">{formErrors.email}</p>
                   )}
                 </div>
 
                 {/* Password Field */}
                 <div className="space-y-2">
-                  <label htmlFor="password" className="block text-sm font-medium text-white/90">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-800">
                     Contraseña
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-white/50" />
+                      <Lock className="h-5 w-5 text-gray-500" />
                     </div>
                     <input
                       id="password"
@@ -224,7 +227,7 @@ const LoginForm = () => {
                       type="password"
                       autoComplete="current-password"
                       required
-                      className={`glass-input w-full pl-12 pr-4 py-4 rounded-2xl text-white placeholder-white/50 focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all duration-300 ${
+                      className={`glass-input w-full pl-12 pr-4 py-4 rounded-2xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-400/50 focus:border-transparent transition-all duration-300 ${
                         formErrors.password ? 'ring-2 ring-red-400/50' : ''
                       }`}
                       placeholder="••••••••"
@@ -234,20 +237,20 @@ const LoginForm = () => {
                     />
                   </div>
                   {formErrors.password && (
-                    <p className="text-red-400 text-sm mt-1">{formErrors.password}</p>
+                    <p className="text-red-700 text-sm mt-1">{formErrors.password}</p>
                   )}
                 </div>
 
                 {/* Error Message */}
                 {error && (
-                  <div className="glass-morphism bg-red-500/20 border-red-400/30 rounded-2xl p-4 animate-slide-in">
+                  <div className="bg-red-100 border border-red-300 rounded-2xl p-4 animate-slide-in">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
-                        <Shield className="w-4 h-4 text-red-400" />
+                      <div className="w-8 h-8 bg-red-200 rounded-full flex items-center justify-center">
+                        <Shield className="w-4 h-4 text-red-600" />
                       </div>
                       <div>
-                        <h4 className="text-red-400 font-medium text-sm">Error de autenticación</h4>
-                        <p className="text-red-300 text-sm">{getErrorMessage(error)}</p>
+                        <h4 className="text-red-700 font-medium text-sm">Error de autenticación</h4>
+                        <p className="text-red-600 text-sm">{getErrorMessage(error)}</p>
                       </div>
                     </div>
                   </div>
@@ -257,18 +260,18 @@ const LoginForm = () => {
                 <button
                   type="submit"
                   disabled={isLoading || isSubmitting}
-                  className="glass-button w-full py-4 px-6 rounded-2xl text-white font-semibold bg-gradient-to-r from-purple-500/30 to-indigo-500/30 hover:from-purple-500/40 hover:to-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 group"
+                  className="glass-button w-full py-4 px-6 rounded-2xl text-gray-900 font-semibold bg-gradient-to-r from-blue-100 to-emerald-100 hover:from-blue-200 hover:to-emerald-200 focus:outline-none focus:ring-2 focus:ring-blue-400/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 group"
                 >
                   {(isLoading || isSubmitting) ? (
                     <div className="flex items-center justify-center space-x-3">
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <div className="w-5 h-5 border-2 border-gray-400 border-t-gray-800 rounded-full animate-spin"></div>
                       <span>Iniciando sesión...</span>
                     </div>
                   ) : (
                     <div className="flex items-center justify-center space-x-3">
                       <span>Iniciar Sesión</span>
-                      <div className="w-5 h-5 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      <div className="w-5 h-5 bg-gray-800/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                        <div className="w-2 h-2 bg-gray-800 rounded-full"></div>
                       </div>
                     </div>
                   )}
@@ -278,7 +281,7 @@ const LoginForm = () => {
                 <div className="text-center">
                   <button
                     type="button"
-                    className="text-white/70 hover:text-white text-sm font-medium transition-colors duration-200 hover:underline"
+                    className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors duration-200 hover:underline"
                     onClick={() => navigate('/reset-password')}
                     disabled={isLoading || isSubmitting}
                   >

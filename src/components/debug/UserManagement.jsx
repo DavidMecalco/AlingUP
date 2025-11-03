@@ -372,7 +372,7 @@ const UserManagement = () => {
                       ticket.estado === 'abierto' ? 'bg-green-500/20 text-green-300' :
                       ticket.estado === 'en_progreso' ? 'bg-blue-500/20 text-blue-300' :
                       ticket.estado === 'vobo' ? 'bg-yellow-500/20 text-yellow-300' :
-                      'bg-purple-500/20 text-purple-300'
+                      'bg-emerald-500/15 text-emerald-700'
                     }`}>
                       {ticket.estado}
                     </span>

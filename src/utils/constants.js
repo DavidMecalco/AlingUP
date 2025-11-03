@@ -7,18 +7,18 @@ export const USER_ROLES = {
 
 // Ticket states
 export const TICKET_STATES = {
-  ABIERTO: 'abierto',
-  EN_PROGRESO: 'en_progreso',
-  VOBO: 'vobo',
-  CERRADO: 'cerrado'
+  abierto: 'Abierto',
+  en_progreso: 'En Progreso',
+  vobo: 'VoBo',
+  cerrado: 'Cerrado'
 }
 
 // Ticket priorities
 export const TICKET_PRIORITIES = {
-  BAJA: 'baja',
-  MEDIA: 'media',
-  ALTA: 'alta',
-  URGENTE: 'urgente'
+  baja: 'Baja',
+  media: 'Media',
+  alta: 'Alta',
+  urgente: 'Urgente'
 }
 
 // Attachment types

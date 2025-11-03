@@ -42,13 +42,16 @@ const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800">
-        {/* Floating Glass Orbs */}
-        <div className="absolute top-20 left-20 w-72 h-72 bg-white/5 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute top-40 right-32 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
-        <div className="absolute bottom-32 left-1/3 w-80 h-80 bg-indigo-500/8 rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-20 right-20 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl animate-float" style={{animationDelay: '0.5s'}}></div>
+      {/* Animated Background - Optimized White Theme */}
+      <div className="fixed inset-0 bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50">
+        {/* Strong texture overlay for better contrast */}
+        <div className="absolute inset-0 bg-white/70"></div>
+        
+        {/* Floating Glass Orbs - Very subtle */}
+        <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400/6 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-40 right-32 w-96 h-96 bg-indigo-400/4 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
+        <div className="absolute bottom-32 left-1/3 w-80 h-80 bg-emerald-400/4 rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-20 right-20 w-64 h-64 bg-slate-400/4 rounded-full blur-3xl animate-float" style={{animationDelay: '0.5s'}}></div>
       </div>
 
       {/* Content */}
@@ -64,15 +67,30 @@ const Layout = ({ children }) => {
 
         <div className="flex min-h-[calc(100vh-4rem)]">
           {/* Sidebar */}
-          <Sidebar 
-            isOpen={isMobileMenuOpen}
-            onClose={closeMobileMenu}
-          />
+          <div className="hidden lg:block w-64 flex-shrink-0">
+            <Sidebar 
+              isOpen={false}
+              onClose={closeMobileMenu}
+            />
+          </div>
+
+          {/* Mobile Sidebar Overlay */}
+          {isMobileMenuOpen && (
+            <div className="lg:hidden fixed inset-0 z-50 flex">
+              <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={closeMobileMenu}></div>
+              <div className="relative w-64 flex-shrink-0">
+                <Sidebar 
+                  isOpen={isMobileMenuOpen}
+                  onClose={closeMobileMenu}
+                />
+              </div>
+            </div>
+          )}
 
           {/* Main content */}
           <main 
             id="main-content"
-            className="flex-1 lg:ml-0"
+            className="flex-1 min-w-0 overflow-hidden"
             role="main"
             aria-label="Contenido principal"
           >

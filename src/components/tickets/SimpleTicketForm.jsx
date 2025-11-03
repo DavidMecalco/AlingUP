@@ -63,7 +63,7 @@ const SimpleTicketForm = ({ onSubmit, onCancel, isLoading = false }) => {
           name="titulo"
           value={formData.titulo}
           onChange={handleInputChange}
-          className={`glass-input w-full px-4 py-3 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all duration-300 ${
+          className={`glass-input w-full px-4 py-3 rounded-xl text-slate-800 placeholder-slate-500 focus:ring-2 focus:ring-blue-400/50 focus:border-transparent transition-all duration-300 ${
             errors.titulo ? 'ring-2 ring-red-400/50' : ''
           }`}
           placeholder="Describe brevemente el problema..."
@@ -88,7 +88,7 @@ const SimpleTicketForm = ({ onSubmit, onCancel, isLoading = false }) => {
           value={formData.descripcion}
           onChange={handleInputChange}
           rows={4}
-          className={`glass-input w-full px-4 py-3 rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all duration-300 resize-none ${
+          className={`glass-input w-full px-4 py-3 rounded-xl text-slate-800 placeholder-slate-500 focus:ring-2 focus:ring-blue-400/50 focus:border-transparent transition-all duration-300 resize-none ${
             errors.descripcion ? 'ring-2 ring-red-400/50' : ''
           }`}
           placeholder="Describe detalladamente el problema o solicitud..."
@@ -112,7 +112,7 @@ const SimpleTicketForm = ({ onSubmit, onCancel, isLoading = false }) => {
           name="prioridad"
           value={formData.prioridad}
           onChange={handleInputChange}
-          className="glass-input w-full px-4 py-3 rounded-xl text-white focus:ring-2 focus:ring-purple-400/50 focus:border-transparent transition-all duration-300"
+          className="glass-input w-full px-4 py-3 rounded-xl text-slate-800 focus:ring-2 focus:ring-blue-400/50 focus:border-transparent transition-all duration-300"
           disabled={isLoading}
         >
           <option value="baja" className="bg-gray-800 text-white">Baja</option>
@@ -127,7 +127,7 @@ const SimpleTicketForm = ({ onSubmit, onCancel, isLoading = false }) => {
         <button
           type="submit"
           disabled={isLoading}
-          className="flex-1 glass-button px-6 py-3 rounded-xl text-white font-medium bg-gradient-to-r from-purple-500/30 to-indigo-500/30 hover:from-purple-500/40 hover:to-indigo-500/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center space-x-2"
+          className="flex-1 glass-button px-6 py-3 rounded-xl text-slate-800 font-medium bg-gradient-to-r from-blue-500/20 to-emerald-500/20 hover:from-blue-500/30 hover:to-emerald-500/30 focus:outline-none focus:ring-2 focus:ring-blue-400/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center justify-center space-x-2"
         >
           {isLoading ? (
             <>

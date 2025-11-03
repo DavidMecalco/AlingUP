@@ -227,7 +227,7 @@ const KanbanColumn = ({ column, tickets, onTicketClick }) => {
             {...provided.droppableProps}
             className={`kanban-drop-zone flex-1 p-4 overflow-y-auto transition-all duration-300 ${
               snapshot.isDraggingOver 
-                ? 'is-dragging-over bg-gradient-to-b from-purple-500/20 to-transparent' 
+                ? 'is-dragging-over bg-gradient-to-b from-blue-500/15 to-transparent' 
                 : ''
             }`}
           >
@@ -243,7 +243,7 @@ const KanbanColumn = ({ column, tickets, onTicketClick }) => {
                   </div>
                   <p className="text-white/50 text-sm">No hay tickets</p>
                   {snapshot.isDraggingOver && (
-                    <p className="text-purple-400 text-xs mt-2 animate-bounce">
+                    <p className="text-blue-600 text-xs mt-2 animate-bounce">
                       ✨ Suelta aquí para cambiar estado
                     </p>
                   )}

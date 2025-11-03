@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TicketCard from './TicketCard'
 import { useAuth } from '../../hooks/useAuth'
@@ -10,7 +10,8 @@ import {
   Plus, 
   Ticket,
   Loader,
-  ChevronDown
+  ChevronDown,
+  BarChart3
 } from 'lucide-react'
 import '../../styles/glass.css'
 
@@ -146,21 +147,21 @@ const TicketList = ({
   if (error) {
     return (
       <div className="text-center py-12">
-        <div className="glass-morphism rounded-2xl p-8 max-w-md mx-auto bg-red-500/10 border-red-400/20">
-          <div className="flex flex-col items-center space-y-4">
-            <div className="w-16 h-16 glass-morphism rounded-3xl flex items-center justify-center">
-              <AlertTriangle className="w-8 h-8 text-red-400" />
+        <div className="glass-morphism rounded-2xl p-8 max-w-md mx-auto bg-gradient-to-br from-red-50/80 to-pink-50/80 border border-red-200/50">
+          <div className="flex flex-col items-center space-y-6">
+            <div className="w-20 h-20 glass-morphism rounded-3xl flex items-center justify-center bg-gradient-to-br from-red-500/10 to-pink-500/10 border border-red-200/30">
+              <AlertTriangle className="w-10 h-10 text-red-500" />
             </div>
             <div className="text-center">
-              <h3 className="text-lg font-medium text-white mb-2">
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
                 Error al cargar tickets
               </h3>
-              <p className="text-white/70 mb-4">{error}</p>
+              <p className="text-gray-700 mb-6 leading-relaxed">{error}</p>
               <button
                 onClick={() => loadTickets(1, true)}
-                className="glass-button px-6 py-3 rounded-2xl text-white font-medium bg-red-500/20 hover:bg-red-500/30 transition-all duration-200 flex items-center space-x-2"
+                className="glass-button px-8 py-4 rounded-2xl text-gray-900 font-semibold bg-gradient-to-r from-red-100 to-pink-100 hover:from-red-200 hover:to-pink-200 border border-red-200/50 transition-all duration-300 flex items-center space-x-3 shadow-lg"
               >
-                <RefreshCw className="w-4 h-4" />
+                <RefreshCw className="w-5 h-5" />
                 <span>Intentar de nuevo</span>
               </button>
             </div>
@@ -173,25 +174,25 @@ const TicketList = ({
   // Empty state
   if (tickets.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="glass-morphism rounded-2xl p-8 max-w-md mx-auto">
-          <div className="flex flex-col items-center space-y-6">
-            <div className="w-20 h-20 glass-morphism rounded-3xl flex items-center justify-center">
-              <Ticket className="w-10 h-10 text-white/40" />
+      <div className="text-center py-16">
+        <div className="glass-morphism rounded-3xl p-12 max-w-lg mx-auto bg-gradient-to-br from-blue-50/80 to-indigo-50/80 border border-blue-200/50">
+          <div className="flex flex-col items-center space-y-8">
+            <div className="w-24 h-24 glass-morphism rounded-3xl flex items-center justify-center bg-gradient-to-br from-blue-500/10 to-indigo-500/10 border border-blue-200/30">
+              <Ticket className="w-12 h-12 text-blue-500" />
             </div>
             <div className="text-center">
-              <h3 className="text-xl font-medium text-white mb-2">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
                 {emptyMessage}
               </h3>
-              <p className="text-white/70 mb-6">
+              <p className="text-gray-700 mb-8 text-lg leading-relaxed">
                 {emptyDescription}
               </p>
               {(user?.profile?.rol === 'cliente' || user?.profile?.rol === 'admin') && (
                 <button
                   onClick={() => navigate('/tickets/create')}
-                  className="glass-button px-6 py-3 rounded-2xl text-white font-medium bg-green-500/20 hover:bg-green-500/30 transition-all duration-200 flex items-center space-x-2 mx-auto"
+                  className="glass-button px-8 py-4 rounded-2xl text-gray-900 font-semibold bg-gradient-to-r from-emerald-100 to-teal-100 hover:from-emerald-200 hover:to-teal-200 border border-emerald-200/50 transition-all duration-300 flex items-center space-x-3 mx-auto shadow-lg hover:shadow-xl"
                 >
-                  <Plus className="w-5 h-5" />
+                  <Plus className="w-6 h-6" />
                   <span>Crear Primer Ticket</span>
                 </button>
               )}
@@ -203,29 +204,40 @@ const TicketList = ({
   }
 
   return (
-    <div className="space-y-6">
-      {/* Results Summary */}
-      <div className="glass-morphism rounded-2xl p-4">
+    <div className="space-y-8">
+      {/* Enhanced Results Summary */}
+      <div className="glass-morphism rounded-2xl p-6 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border border-blue-200/30">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-white/80">
-            Mostrando <span className="font-medium text-white">{tickets.length}</span> de{' '}
-            <span className="font-medium text-white">{pagination.count}</span> tickets
-          </p>
+          <div className="flex items-center space-x-4">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 rounded-xl flex items-center justify-center">
+              <BarChart3 className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-lg font-semibold text-gray-900">
+                Mostrando <span className="text-blue-600">{tickets.length}</span> de{' '}
+                <span className="text-blue-600">{pagination.count}</span> tickets
+              </p>
+              <p className="text-gray-600 text-sm">Resultados de búsqueda actualizados</p>
+            </div>
+          </div>
           {pagination.count > 0 && (
-            <div className="text-sm text-white/60">
-              Página {pagination.page} de {pagination.totalPages}
+            <div className="text-right">
+              <div className="text-lg font-semibold text-gray-900">
+                Página {pagination.page} de {pagination.totalPages}
+              </div>
+              <div className="text-gray-600 text-sm">Navegación de resultados</div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Tickets Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* Enhanced Tickets Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8">
         {tickets.map((ticket, index) => (
           <div 
             key={ticket.id}
             className="animate-slide-up"
-            style={{animationDelay: `${index * 0.1}s`}}
+            style={{animationDelay: `${index * 0.05}s`}}
           >
             <TicketCard
               ticket={ticket}
@@ -237,23 +249,26 @@ const TicketList = ({
         ))}
       </div>
 
-      {/* Load More Button */}
+      {/* Enhanced Load More Button */}
       {pagination.hasMore && (
-        <div className="text-center pt-6">
+        <div className="text-center pt-8">
           <button
             onClick={handleLoadMore}
             disabled={isLoading}
-            className="glass-button px-8 py-4 rounded-2xl text-white font-medium bg-blue-500/20 hover:bg-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2 mx-auto"
+            className="glass-button px-10 py-5 rounded-2xl text-gray-900 font-semibold bg-gradient-to-r from-blue-100 to-indigo-100 hover:from-blue-200 hover:to-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed border border-blue-200/50 transition-all duration-300 flex items-center space-x-4 mx-auto shadow-lg hover:shadow-xl"
           >
             {isLoading ? (
               <>
-                <Loader className="animate-spin w-5 h-5" />
-                <span>Cargando...</span>
+                <Loader className="animate-spin w-6 h-6" />
+                <span className="text-lg">Cargando más tickets...</span>
               </>
             ) : (
               <>
-                <ChevronDown className="w-5 h-5" />
-                <span>Cargar más tickets ({pagination.count - tickets.length} restantes)</span>
+                <ChevronDown className="w-6 h-6" />
+                <span className="text-lg">Cargar más tickets</span>
+                <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  {pagination.count - tickets.length} restantes
+                </span>
               </>
             )}
           </button>

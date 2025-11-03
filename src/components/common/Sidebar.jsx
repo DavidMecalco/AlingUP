@@ -116,13 +116,13 @@ const Sidebar = ({ isOpen, onClose }) => {
         className={`
           flex items-center px-4 py-3 text-sm font-medium rounded-2xl transition-all duration-300
           ${isActive 
-            ? 'glass-morphism bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-white border-l-2 border-purple-400' 
-            : 'text-white/70 hover:text-white hover:bg-white/10'
+            ? 'glass-morphism bg-gradient-to-r from-blue-100 to-emerald-100 text-gray-900 border-l-2 border-blue-600' 
+            : 'text-gray-700 hover:text-gray-900 hover:bg-white/30'
           }
         `}
         aria-current={isActive ? 'page' : undefined}
       >
-        <item.icon className={`h-5 w-5 mr-3 ${isActive ? 'text-purple-300' : 'text-white/50'}`} />
+        <item.icon className={`h-5 w-5 mr-3 ${isActive ? 'text-blue-700' : 'text-gray-600'}`} />
         {item.name}
       </NavLink>
     );
@@ -142,16 +142,16 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <aside
         className={`
-          fixed top-0 left-0 z-50 h-screen w-64 glass-sidebar transform transition-all duration-300 ease-in-out
-          lg:relative lg:translate-x-0 lg:z-auto
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          ${isOpen ? 'fixed' : 'hidden lg:block'} top-0 left-0 z-50 h-screen w-64 glass-sidebar transform transition-all duration-300 ease-in-out
+          lg:relative lg:translate-x-0 lg:z-auto lg:block
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
         role="navigation"
         aria-label="Navegación principal"
       >
         {/* Sidebar header */}
         <div className="flex items-center justify-center h-16 px-4 border-b border-white/10 lg:hidden">
-          <h2 className="text-lg font-semibold text-white">Navegación</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Navegación</h2>
         </div>
 
         {/* Navigation */}
@@ -169,16 +169,16 @@ const Sidebar = ({ isOpen, onClose }) => {
         <div className="lg:hidden border-t border-white/10 p-4">
           <div className="glass-morphism rounded-2xl p-4" role="banner" aria-label="Información del usuario">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 glass-morphism bg-gradient-to-br from-purple-500/30 to-indigo-500/30 rounded-xl flex items-center justify-center">
-                <span className="text-white font-medium text-sm">
+              <div className="w-10 h-10 glass-morphism bg-gradient-to-br from-blue-500/20 to-emerald-500/20 rounded-xl flex items-center justify-center">
+                <span className="text-gray-800 font-medium text-sm">
                   {user?.nombre_completo?.charAt(0) || user?.email?.charAt(0)}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate">
+                <p className="text-sm font-medium text-gray-900 truncate">
                   {user?.nombre_completo || user?.email}
                 </p>
-                <p className="text-xs text-purple-300 capitalize">
+                <p className="text-xs text-gray-600 capitalize">
                   {user?.rol}
                 </p>
               </div>
