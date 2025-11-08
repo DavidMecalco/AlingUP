@@ -142,8 +142,8 @@ const Sidebar = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <aside
         className={`
-          ${isOpen ? 'fixed' : 'hidden lg:block'} top-0 left-0 z-50 h-screen w-64 glass-sidebar transform transition-all duration-300 ease-in-out
-          lg:relative lg:translate-x-0 lg:z-auto lg:block
+          ${isOpen ? 'fixed' : 'hidden lg:block'} top-0 left-0 z-50 h-full w-64 lg:w-full glass-sidebar transform transition-all duration-300 ease-in-out
+          lg:relative lg:translate-x-0 lg:z-auto lg:block lg:h-full
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
         role="navigation"
@@ -156,7 +156,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
         {/* Navigation */}
         <nav 
-          className="flex-1 px-4 py-6 space-y-3 overflow-y-auto"
+          className="flex-1 px-4 py-6 space-y-3 overflow-y-auto h-full"
           role="navigation"
           aria-label="Menú de navegación"
         >

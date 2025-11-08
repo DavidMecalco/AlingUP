@@ -8,13 +8,13 @@ import AlingUPLogo from '../common/AlingUPLogo'
 import analyticsService from '../../services/analyticsService'
 import ticketService from '../../services/ticketService'
 import { useAuth } from '../../hooks/useAuth'
-import { 
-  Plus, 
-  Ticket, 
-  Clock, 
-  CheckCircle, 
-  AlertTriangle, 
-  TrendingUp, 
+import {
+  Plus,
+  Ticket,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  TrendingUp,
   RefreshCw,
   Zap,
   ArrowRight,
@@ -62,8 +62,8 @@ const ClientDashboard = () => {
         evolutionResult
       ] = await Promise.all([
         analyticsService.getDashboardKPIs(filters),
-        ticketService.getTicketsByClient(clientId, { 
-          ...filters, 
+        ticketService.getTicketsByClient(clientId, {
+          ...filters,
           limit: 5,
           sortBy: 'created_at',
           sortOrder: 'desc'
@@ -111,7 +111,7 @@ const ClientDashboard = () => {
 
   const getStateChartData = () => {
     if (!kpis?.ticketsByState) return []
-    
+
     return kpis.ticketsByState.map(item => ({
       name: item.label || item.name,
       value: item.value
@@ -153,7 +153,7 @@ const ClientDashboard = () => {
             <h3 className="text-lg font-medium text-gray-900">Error al cargar el dashboard</h3>
           </div>
           <p className="text-gray-700 mb-4">{error}</p>
-          <button 
+          <button
             onClick={loadClientDashboardData}
             className="glass-button px-4 py-2 rounded-xl text-gray-900 font-medium bg-red-100 hover:bg-red-200 transition-all duration-200 flex items-center space-x-2"
           >
@@ -166,13 +166,13 @@ const ClientDashboard = () => {
   }
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-4 lg:p-6 space-y-6">
       {/* Hero Header */}
       <GlassCard className="animate-slide-in relative overflow-hidden">
         {/* Floating decorative elements */}
         <div className="absolute top-4 right-4 w-20 h-20 bg-blue-500/8 rounded-full blur-xl"></div>
         <div className="absolute bottom-4 left-4 w-16 h-16 bg-emerald-500/8 rounded-full blur-xl"></div>
-        
+
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
@@ -186,7 +186,7 @@ const ClientDashboard = () => {
                 </p>
               </div>
             </div>
-            <button 
+            <button
               onClick={loadClientDashboardData}
               disabled={isLoading}
               className="glass-button px-6 py-3 rounded-2xl text-gray-900 font-medium bg-blue-100 hover:bg-blue-200 disabled:opacity-50 transition-all duration-200 flex items-center space-x-2"
@@ -225,15 +225,15 @@ const ClientDashboard = () => {
       {/* Action Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Create New Ticket - Primary CTA */}
-        <GlassCard 
-          variant="primary" 
+        <GlassCard
+          variant="primary"
           className="animate-slide-up cursor-pointer group relative overflow-hidden"
           onClick={handleCreateTicket}
-          style={{animationDelay: '0.1s'}}
+          style={{ animationDelay: '0.1s' }}
         >
           {/* Animated background gradient */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/15 to-emerald-500/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          
+
           <div className="relative z-10 flex items-center justify-between">
             <div>
               <div className="flex items-center space-x-3 mb-3">
@@ -262,11 +262,11 @@ const ClientDashboard = () => {
         </GlassCard>
 
         {/* View All Tickets */}
-        <GlassCard 
-          variant="default" 
+        <GlassCard
+          variant="default"
           className="animate-slide-up cursor-pointer group"
           onClick={handleViewAllTickets}
-          style={{animationDelay: '0.2s'}}
+          style={{ animationDelay: '0.2s' }}
         >
           <div className="flex items-center justify-between">
             <div>
@@ -298,7 +298,7 @@ const ClientDashboard = () => {
 
       {/* Detailed KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <GlassCard variant="primary" className="animate-slide-up group" style={{animationDelay: '0.3s'}}>
+        <GlassCard variant="primary" className="animate-slide-up group" style={{ animationDelay: '0.3s' }}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-700 text-sm font-medium mb-1">Mis Tickets</p>
@@ -317,7 +317,7 @@ const ClientDashboard = () => {
           </div>
         </GlassCard>
 
-        <GlassCard variant="warning" className="animate-slide-up group" style={{animationDelay: '0.4s'}}>
+        <GlassCard variant="warning" className="animate-slide-up group" style={{ animationDelay: '0.4s' }}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-700 text-sm font-medium mb-1">En Progreso</p>
@@ -336,7 +336,7 @@ const ClientDashboard = () => {
           </div>
         </GlassCard>
 
-        <GlassCard variant="success" className="animate-slide-up group" style={{animationDelay: '0.5s'}}>
+        <GlassCard variant="success" className="animate-slide-up group" style={{ animationDelay: '0.5s' }}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-700 text-sm font-medium mb-1">Resueltos</p>
@@ -355,7 +355,7 @@ const ClientDashboard = () => {
           </div>
         </GlassCard>
 
-        <GlassCard variant="error" className="animate-slide-up group" style={{animationDelay: '0.6s'}}>
+        <GlassCard variant="error" className="animate-slide-up group" style={{ animationDelay: '0.6s' }}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-700 text-sm font-medium mb-1">Urgentes</p>
@@ -376,11 +376,11 @@ const ClientDashboard = () => {
       </div>
 
       {/* Recent Ticket Activity - Redesigned */}
-      <GlassCard className="animate-slide-up relative overflow-hidden" style={{animationDelay: '0.7s'}}>
+      <GlassCard className="animate-slide-up relative overflow-hidden" style={{ animationDelay: '0.7s' }}>
         {/* Decorative background elements */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/5 to-emerald-500/5 rounded-full blur-2xl"></div>
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-indigo-500/5 to-blue-500/5 rounded-full blur-2xl"></div>
-        
+
         <div className="relative z-10">
           {/* Enhanced Header */}
           <div className="flex items-center justify-between mb-8">
@@ -432,13 +432,13 @@ const ClientDashboard = () => {
             /* Tickets List - Enhanced */
             <div className="space-y-3">
               {recentTickets.map((ticket, index) => (
-                <div 
+                <div
                   key={ticket.id}
                   className="group relative"
-                  style={{animationDelay: `${0.8 + index * 0.1}s`}}
+                  style={{ animationDelay: `${0.8 + index * 0.1}s` }}
                 >
                   {/* Modern Ticket Card */}
-                  <div 
+                  <div
                     className="glass-strong rounded-2xl p-6 hover:shadow-lg transition-all duration-300 cursor-pointer animate-slide-up border border-white/50 hover:border-white/70"
                     onClick={() => handleTicketClick(ticket)}
                   >
@@ -457,17 +457,16 @@ const ClientDashboard = () => {
                           </p>
                         </div>
                       </div>
-                      
+
                       {/* Status Badge */}
-                      <div className={`px-3 py-1.5 rounded-xl text-xs font-semibold border ${
-                        ticket.estado === 'abierto' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                      <div className={`px-3 py-1.5 rounded-xl text-xs font-semibold border ${ticket.estado === 'abierto' ? 'bg-blue-100 text-blue-800 border-blue-200' :
                         ticket.estado === 'en_progreso' ? 'bg-amber-100 text-amber-800 border-amber-200' :
-                        ticket.estado === 'vobo' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
-                        'bg-slate-100 text-slate-800 border-slate-200'
-                      }`}>
+                          ticket.estado === 'vobo' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
+                            'bg-slate-100 text-slate-800 border-slate-200'
+                        }`}>
                         {ticket.estado === 'abierto' ? 'Abierto' :
-                         ticket.estado === 'en_progreso' ? 'En Progreso' :
-                         ticket.estado === 'vobo' ? 'VoBo' : 'Cerrado'}
+                          ticket.estado === 'en_progreso' ? 'En Progreso' :
+                            ticket.estado === 'vobo' ? 'VoBo' : 'Cerrado'}
                       </div>
                     </div>
 
@@ -481,17 +480,16 @@ const ClientDashboard = () => {
                       <div className="flex items-center space-x-4">
                         {/* Priority */}
                         <div className="flex items-center space-x-1">
-                          <div className={`w-2 h-2 rounded-full ${
-                            ticket.prioridad === 'urgente' ? 'bg-red-500' :
+                          <div className={`w-2 h-2 rounded-full ${ticket.prioridad === 'urgente' ? 'bg-red-500' :
                             ticket.prioridad === 'alta' ? 'bg-orange-500' :
-                            ticket.prioridad === 'media' ? 'bg-blue-500' :
-                            'bg-emerald-500'
-                          }`}></div>
+                              ticket.prioridad === 'media' ? 'bg-blue-500' :
+                                'bg-emerald-500'
+                            }`}></div>
                           <span className="text-xs font-medium text-gray-600 capitalize">
                             {ticket.prioridad}
                           </span>
                         </div>
-                        
+
                         {/* Time */}
                         <div className="flex items-center space-x-1">
                           <Clock className="w-3 h-3 text-gray-500" />
@@ -518,11 +516,11 @@ const ClientDashboard = () => {
       {/* Analytics Charts - Redesigned */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Tickets by State - Enhanced Donut Chart */}
-        <GlassCard className="animate-slide-up relative overflow-hidden" style={{animationDelay: '1s'}}>
+        <GlassCard className="animate-slide-up relative overflow-hidden" style={{ animationDelay: '1s' }}>
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-500/8 to-indigo-500/8 rounded-full blur-xl"></div>
           <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-blue-500/6 to-emerald-500/6 rounded-full blur-lg"></div>
-          
+
           <div className="relative z-10">
             {/* Enhanced Header */}
             <div className="flex items-center justify-between mb-8">
@@ -551,17 +549,16 @@ const ClientDashboard = () => {
                     centerText="Total"
                     height={280}
                   />
-                  
+
                   {/* Legend - Enhanced */}
                   <div className="mt-6 grid grid-cols-2 gap-3 w-full">
                     {getStateChartData().map((item, index) => (
                       <div key={index} className="flex items-center space-x-3 p-3 glass-subtle rounded-xl">
-                        <div className={`w-3 h-3 rounded-full ${
-                          item.name === 'Abierto' ? 'bg-blue-500' :
+                        <div className={`w-3 h-3 rounded-full ${item.name === 'Abierto' ? 'bg-blue-500' :
                           item.name === 'En Progreso' ? 'bg-amber-500' :
-                          item.name === 'VoBo' ? 'bg-emerald-500' :
-                          'bg-slate-500'
-                        }`}></div>
+                            item.name === 'VoBo' ? 'bg-emerald-500' :
+                              'bg-slate-500'
+                          }`}></div>
                         <div className="flex-1">
                           <p className="text-sm font-medium text-gray-900">{item.name}</p>
                           <p className="text-xs text-gray-600">{item.value} tickets</p>
@@ -585,11 +582,11 @@ const ClientDashboard = () => {
         </GlassCard>
 
         {/* Evolution Chart - Enhanced Line Chart */}
-        <GlassCard className="animate-slide-up relative overflow-hidden" style={{animationDelay: '1.1s'}}>
+        <GlassCard className="animate-slide-up relative overflow-hidden" style={{ animationDelay: '1.1s' }}>
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-500/8 to-blue-500/8 rounded-full blur-xl"></div>
           <div className="absolute bottom-0 left-0 w-18 h-18 bg-gradient-to-tr from-emerald-500/6 to-indigo-500/6 rounded-full blur-lg"></div>
-          
+
           <div className="relative z-10">
             {/* Enhanced Header */}
             <div className="flex items-center justify-between mb-8">
@@ -620,7 +617,7 @@ const ClientDashboard = () => {
                     color="#10b981"
                     height={280}
                   />
-                  
+
                   {/* Stats Summary */}
                   <div className="mt-6 grid grid-cols-3 gap-3">
                     <div className="text-center p-3 glass-subtle rounded-xl">
@@ -660,14 +657,14 @@ const ClientDashboard = () => {
 
       {/* Performance Metrics */}
       {kpis?.avgResolutionTime > 0 && (
-        <GlassCard className="animate-slide-up" style={{animationDelay: '1.2s'}}>
+        <GlassCard className="animate-slide-up" style={{ animationDelay: '1.2s' }}>
           <div className="flex items-center space-x-3 mb-6">
             <div className="w-10 h-10 glass-morphism rounded-2xl flex items-center justify-center">
               <Clock className="w-5 h-5 text-amber-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900">Métricas de Rendimiento</h3>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="glass-morphism rounded-2xl p-6 text-center">
               <Clock className="w-8 h-8 text-amber-600 mx-auto mb-3" />
@@ -677,14 +674,14 @@ const ClientDashboard = () => {
               </p>
               <p className="text-gray-600 text-xs mt-1">de resolución</p>
             </div>
-            
+
             <div className="glass-morphism rounded-2xl p-6 text-center">
               <CheckCircle className="w-8 h-8 text-emerald-600 mx-auto mb-3" />
               <p className="text-sm font-medium text-gray-700 mb-1">Tickets Resueltos</p>
               <p className="text-2xl font-bold text-gray-900">{kpis.closedTickets}</p>
               <p className="text-gray-600 text-xs mt-1">completados</p>
             </div>
-            
+
             <div className="glass-morphism rounded-2xl p-6 text-center">
               <Star className="w-8 h-8 text-indigo-600 mx-auto mb-3" />
               <p className="text-sm font-medium text-gray-700 mb-1">Satisfacción</p>

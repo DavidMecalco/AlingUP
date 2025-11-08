@@ -66,13 +66,13 @@ const Layout = ({ children }) => {
         />
 
         <div className="flex min-h-[calc(100vh-4rem)]">
-          {/* Sidebar */}
-          <div className="hidden lg:block w-64 flex-shrink-0">
+          {/* Sidebar - Fixed positioning to prevent cutting */}
+          <aside className="hidden lg:block fixed top-16 left-0 w-56 h-[calc(100vh-4rem)] overflow-y-auto z-30">
             <Sidebar 
               isOpen={false}
               onClose={closeMobileMenu}
             />
-          </div>
+          </aside>
 
           {/* Mobile Sidebar Overlay */}
           {isMobileMenuOpen && (
@@ -87,10 +87,10 @@ const Layout = ({ children }) => {
             </div>
           )}
 
-          {/* Main content */}
+          {/* Main content - Adjusted margin for sidebar */}
           <main 
             id="main-content"
-            className="flex-1 min-w-0 overflow-hidden"
+            className="flex-1 min-w-0 lg:ml-56 overflow-x-hidden"
             role="main"
             aria-label="Contenido principal"
           >

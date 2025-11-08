@@ -196,7 +196,7 @@ const TechnicianDashboard = () => {
   const performanceMetrics = calculatePerformanceMetrics()
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-4 lg:p-6 space-y-6">
       {/* Hero Header */}
       <GlassCard className="animate-slide-in relative overflow-hidden">
         {/* Floating decorative elements */}
